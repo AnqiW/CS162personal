@@ -5,6 +5,7 @@ int num_words = 0;
 int num_chars = 0;
 int newline = 1;
 int lastisspace = 0;
+int rflag = 0;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
@@ -14,9 +15,15 @@ if (argc==1){
         if (iochar == ' ' && lastisspace == 0){
                         num_words+=1;
 			}
-                if (iochar == '\n'){
+                if (iochar == '\n' && rflag ==0){
                         num_lines +=1;
 			newline = 1;}
+		if (iochar == '\r'){
+			num_lines +=1;
+			newline = 1;
+			rflag = 1;	}
+		if (iochar != '\r'){
+			rflag = 0;}
 		if (iochar == ' '){
                 lastisspace = 1;}
 		else{
