@@ -1,0 +1,7 @@
+*the value of argv is (char **) 0x7fffffffe638, an array of arguments that are passed into the program 
+* argv[0] points to the first argument, which is wc, "/home/vagrant/code/personal/hw0/wc" 0x7fffffffe852
+* The address of the function main is at main=0x400611 0x40061c
+* Info stack gives us all the frames in the call stack, in this case we can in the main function frame with two arguments the first one is the number of arguments gotten in the command line and the second argument is the array of arguments gotten
+* Info frame gives us where the frame starts and ends, the addresses of some important registers, local variables and arguments \
+* Rbp is holding the address of local variables, r13 is argv-8 (in hex)
+
