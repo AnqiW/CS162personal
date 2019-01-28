@@ -42,5 +42,6 @@ while (current != EOF){
 printf("%d ", num_lines);
 printf("%d ", num_words);
 printf("%d ", num_chars);
+return 0;
 }
 
