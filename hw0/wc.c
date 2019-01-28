@@ -4,17 +4,23 @@ int num_lines = 0;
 int num_words = 0;
 int num_chars = 0;
 int newline = 1;
+int lastisspace = 0;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
     {if (newline && (iochar!=' ') &&( iochar != '\n') ){
                         num_words+=1;
                         newline = 0;}
-        if (iochar == ' '){
-                        num_words+=1;}
+        if (iochar == ' ' && lastisspace == 0){
+                        num_words+=1;
+			}
                 if (iochar == '\n'){
                         num_lines +=1;
 			newline = 1;}
+		if (iochar == ' '){
+                lastisspace = 1;}
+		else{
+		lastisspace = 0;}
                 num_chars += 1;
 
 }
