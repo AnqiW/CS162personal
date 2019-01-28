@@ -42,7 +42,9 @@ FILE *opened = fopen(file, "r");
 char current = getc(opened);
 char next_curr = getc(opened);
 while (current != EOF){
-		if (newline && current!=' ' && current != '\n'&&(current != '\r') && current!= '\x00' ){
+	if(current != '\x00'){	
+
+	if (newline && current!=' ' && current != '\n'&&(current != '\r') && current!= '\x00' ){
 			num_words+=1;
 			newline = 0;}
 		if (current == ' ' && lastisspace == 0 && newline == 0){
@@ -61,6 +63,7 @@ while (current != EOF){
                 lastisspace = 1;}
                 else{
                 lastisspace = 0;}
+		}
                 num_chars += 1;
                 current = next_curr;
                 next_curr = getc(opened);
