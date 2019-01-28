@@ -7,13 +7,14 @@ int newline = 1;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
-    {if (newline && iochar!=' ' && iochar != '\n' ){
+    {if (newline && (iochar!=' ') &&( iochar != '\n') ){
                         num_words+=1;
                         newline = 0;}
         if (iochar == ' '){
                         num_words+=1;}
                 if (iochar == '\n'){
-                        num_lines +=1;}
+                        num_lines +=1;
+			newline = 1;}
                 num_chars += 1;
 
 }
