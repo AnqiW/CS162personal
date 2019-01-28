@@ -9,7 +9,7 @@ int rflag = 0;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
-    {if (newline && (iochar!=' ') &&( iochar != '\n') ){
+    {if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r') ){
                         num_words+=1;
                         newline = 0;}
         if (iochar == ' ' && lastisspace == 0){
