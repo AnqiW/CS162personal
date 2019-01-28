@@ -12,7 +12,7 @@ if (argc==1){
     {if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r') ){
                         num_words+=1;
                         newline = 0;}
-        if (iochar == ' ' && lastisspace == 0){
+        if (iochar == ' ' && lastisspace == 0 && newline == 0){
                         num_words+=1;
 			}
                 if (iochar == '\n' && rflag ==0){
