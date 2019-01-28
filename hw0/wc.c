@@ -37,15 +37,25 @@ FILE *opened = fopen(file, "r");
 char current = getc(opened);
 char next_curr = getc(opened);
 while (current != EOF){
-		if (newline && current!=' ' && current != '\n' ){
+		if (newline && current!=' ' && current != '\n'&&(current != '\r') ){
 			num_words+=1;
 			newline = 0;}
+		if (current == ' ' && lastisspace == 0 && newline == 0){
+                        num_words+=1;
+                        }
+                if (current == '\n' && rflag ==0){
+                        num_lines +=1;
+                        newline = 1;}
+                if (current == '\r'){
+                        num_lines +=1;
+                        newline = 1;
+                        rflag = 1;      }
+                if (current != '\r'){
+                        rflag = 0;}
                 if (current == ' '){
-                        num_words+=1;}
-                if (current == '\n'){
-			newline = 1;
-                        num_lines +=1;}
-
+                lastisspace = 1;}
+                else{
+                lastisspace = 0;}
                 num_chars += 1;
                 current = next_curr;
                 next_curr = getc(opened);
