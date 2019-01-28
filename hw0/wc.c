@@ -9,7 +9,11 @@ int rflag = 0;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
-    {if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r')&&(iochar != '\x00') ){
+    {
+	if(iochar != '\x00'){
+		 
+        
+	if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r')&&(iochar != '\x00') ){
                         num_words+=1;
                         newline = 0;}
         if ((iochar == ' '|| iochar== '\t') && lastisspace == 0 && newline == 0){
@@ -28,6 +32,7 @@ if (argc==1){
                 lastisspace = 1;}
 		else{
 		lastisspace = 0;}
+		}
                 num_chars += 1;
 
 }
