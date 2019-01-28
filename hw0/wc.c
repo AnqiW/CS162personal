@@ -9,7 +9,7 @@ int rflag = 0;
 if (argc==1){
         char iochar;
  while ((iochar = getchar()) !=EOF)
-    {if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r') ){
+    {if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r')&&(iochar != '\x00') ){
                         num_words+=1;
                         newline = 0;}
         if ((iochar == ' '|| iochar== '\t') && lastisspace == 0 && newline == 0){
@@ -37,7 +37,7 @@ FILE *opened = fopen(file, "r");
 char current = getc(opened);
 char next_curr = getc(opened);
 while (current != EOF){
-		if (newline && current!=' ' && current != '\n'&&(current != '\r') ){
+		if (newline && current!=' ' && current != '\n'&&(current != '\r') && current!= '\x00' ){
 			num_words+=1;
 			newline = 0;}
 		if (current == ' ' && lastisspace == 0 && newline == 0){
