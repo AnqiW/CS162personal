@@ -4,7 +4,7 @@ int num_lines = 0;
 int num_words = 0;
 int num_chars = 0;
 int newline = 1;
-int lastisspace = 0;
+int lastisspace = 1;
 int rflag = 0;
 if (argc==1){
         char iochar;
@@ -13,25 +13,20 @@ if (argc==1){
 	if(iochar != '\x00'){
 		 
         
-	if (newline && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r')&&(iochar != '\x00') ){
+	if (lastisspace && (iochar!=' ') &&( iochar != '\n')&&(iochar != '\r')&&(iochar != '\t') ){
                         num_words+=1;
-                        newline = 0;}
-        if ((iochar == ' '|| iochar== '\t') && lastisspace == 0 && newline == 0){
-                        num_words+=1;
-			}
+                        lastisspace = 0;}
                 if (iochar == '\n' && rflag ==0){
                         num_lines +=1;
-			newline = 1;}
+			lastisspace = 1;}
 		if (iochar == '\r'){
 			num_lines +=1;
-			newline = 1;
+			lastisspace = 1;
 			rflag = 1;	}
 		if (iochar != '\r'){
 			rflag = 0;}
 		if (iochar == ' '|| iochar  == '\t'){
                 lastisspace = 1;}
-		else{
-		lastisspace = 0;}
 		}
                 num_chars += 1;
 
