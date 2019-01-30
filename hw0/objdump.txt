@@ -1,1 +1,4 @@
-To BE DONE
+*File format is elf64-x86-64, architecture is i386:x86-64.
+*Some names of sections are .dynstr .init  .plt .text .fini and some names of segments are Program Header, Dynamic Section, Version References, Sections etc.
+*Section .txt include main, the address is still 0x40060d, which is the same as in gdb
+* NO. Because stack and heap are created when execute the program(during runtime).But objdump shouws information only of the executable, where stack and heap hasn't been created.

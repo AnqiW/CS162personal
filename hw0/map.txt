@@ -1,1 +1,6 @@
-TO BE DONE
+* main recur and static data are under the section .text, heap and stack are not defined in the executables since they are created during the runtime.
+* Some important segments are .rodata which is the read only data. .text contains the code. .data contains all the initialized data.
+* The stack is growing downwards.
+* The stack frame is 0x7fffda11f69c - 7fffda11f66c = 0x30 large
+* Heap is at 0x671010, and it grows upward.
+* There are extra space between the teo malloced area and they are not contiguous. 
