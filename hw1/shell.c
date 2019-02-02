@@ -65,7 +65,7 @@ int cmd_exit(unused struct tokens *tokens) {
 int cmd_pwd(unused struct tokens *tokens){
    char cwd[4096];
    if (getcwd(cwd, sizeof(cwd))) {
-       printf(" %s\n", cwd);
+       printf("%s\n", cwd);
    } else {
        perror("getcwd() error");
        return -1;
