@@ -75,12 +75,8 @@ int cmd_pwd(unused struct tokens *tokens){
 
 /* I added this function, change the current directory according to stdinput*/
 int cmd_cd(unused struct tokens *tokens){
-  char cwd[4096];
   chdir(tokens_get_token(tokens, 1));
-  if (getcwd(cwd, sizeof(cwd))) {
-       printf(" %s\n", cwd);
-   }
-  return 0;
+  return 1;
 
 
 }
