@@ -137,9 +137,27 @@ int main(unused int argc, unused char *argv[]) {
     if (fundex >= 0) {
       cmd_table[fundex].fun(tokens);
     } else {
+      pid_t pid = fork();
+      int length = tokens_get_length(tokens);
+      char *target[length+1];
+      for(int i=0; i<length;i++ ){
+	 target[i] = tokens_get_token(tokens, i);}
+      target[length] = NULL; 
+      if(pid==0){
+	printf("%s", tokens_get_token(tokens, 0));
+	if (execv(tokens_get_token(tokens, 0), target) < 0) { 
+            printf("Command doesn't exit"); 
+        }
+	}
+      else{// waiting for child to terminate 
+        wait(NULL);
+       }
+      
+
       /* REPLACE this to run commands as programs. */
-      fprintf(stdout, "This shell doesn't know how to run programs.\n");
+ 
     }
+
 
     if (shell_is_interactive)
       /* Please only print shell prompts when standard input is not a tty */
@@ -150,4 +168,5 @@ int main(unused int argc, unused char *argv[]) {
   }
 
   return 0;
+
 }
