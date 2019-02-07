@@ -137,19 +137,19 @@ int main(unused int argc, unused char *argv[]) {
     if (fundex >= 0) {
       cmd_table[fundex].fun(tokens);
     } else {
-      printf("===========break point 0.01=====\n");
+      
       int length = tokens_get_length(tokens);
-      printf("===========break point 0.02=====\n");
+      
       char *target[length+1];
-      printf("===========break point 0.03=====\n");
+      
       for(int i=0; i<length;i++ ){
 	    target[i] = tokens_get_token(tokens, i);}
-      printf("_________I'm here break point 0.11-------\n");
+      
       target[length] = NULL;
       // check the first token if / exists there.
       // If / is there, the first argument is a path
       if (strchr(tokens_get_token(tokens, 0), '/')){
-        fprintf(stderr, "Got argument as a path\n");
+        //fprintf(stderr, "Got argument as a path\n");
         pid_t pid = fork();
         if (pid == 0){
           if (execv(target[0], target) < 0) { 
@@ -159,23 +159,20 @@ int main(unused int argc, unused char *argv[]) {
           wait(NULL);
         }
       }else{ // this means the first token is not a path, so loof for it in PATH
-        char cwd[4096];
-        getcwd(cwd, sizeof(cwd));
-        printf("I'm here in the no path argument switch\n");
-        printf("++++++++break point 0.13++++++\n");
+
         char *path = getenv("PATH");
-        printf("the PATH ENV is : \n ");
-        printf("%s \n", path);
+        //printf("the PATH ENV is : \n ");
+        //printf("%s \n", path);
         //printf("**********Here break point 1******\n");
         char *token;
         token = strtok(path, ":");
         //printf("**********Here break point 2******\n");
-        printf("%s", token);
-        printf("the get first token is: \n");
-        printf("%s \n", tokens_get_token(tokens, 0));
+        //printf("%s", token);
+        //printf("the get first token is: \n");
+        //printf("%s \n", tokens_get_token(tokens, 0));
         while (token != NULL){
-          printf("token currently is ");
-          printf("%s \n", token);
+          //printf("token currently is ");
+          //printf("%s \n", token);
           //char *pa = strcat(token, "/");
           //pa = strcat(token, tokens_get_token(tokens, 0));
           //printf("pa current is: ");
@@ -187,20 +184,20 @@ int main(unused int argc, unused char *argv[]) {
           strcat(fin_path, "/");
           strcat(fin_path, tokens_get_token(tokens, 0));
           if (access(fin_path, F_OK) == 0){ 
-            printf("the final path finally is: %s", fin_path);
+            //printf("the final path finally is: %s", fin_path);
             pid_t pid = fork();
             if (pid == 0){
               if (execv(fin_path, target) < 0) {
-                fprintf(stderr,"Got argument as an executable. execv failed");
+                //fprintf(stderr,"Got argument as an executable. execv failed");
               }
-              exit(0);
+
             }else if (pid >0){
               wait(NULL);
             }
           }
           token = strtok(NULL, ":");        
         }
-      fprintf(stderr, "executable not found ");
+      //fprintf(stderr, "executable not found ");
       
       } 
      }
