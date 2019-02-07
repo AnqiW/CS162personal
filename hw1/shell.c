@@ -137,20 +137,50 @@ int main(unused int argc, unused char *argv[]) {
     if (fundex >= 0) {
       cmd_table[fundex].fun(tokens);
     } else {
-      pid_t pid = fork();
       int length = tokens_get_length(tokens);
       char *target[length+1];
       for(int i=0; i<length;i++ ){
 	 target[i] = tokens_get_token(tokens, i);}
-      target[length] = NULL; 
-      if(pid==0){
-	printf("%s", tokens_get_token(tokens, 0));
-	if (execv(tokens_get_token(tokens, 0), target) < 0) { 
-            printf("Command doesn't exit"); 
-        }
+      target[length] = NULL;
+	pid_t pid = fork(); 
+        if(pid<0){
+	printf("fork failed");
 	}
+	else if(pid==0){
+	tcsetpgrp(0, getpgid(getpid()));
+	printf("I'm in the child process");
+	// check the first token if / exists there.
+	// If / is there, the first argument is a path
+	if (strchr(tokens_get_token(tokens, 0), '/')){
+		printf("Got argument as a path");
+		if (execv(target[0], target) < 0) { 
+            		printf("Command doesn't exist"); 
+        	}
+	}else{ // this means the first token is not a path, so loof for it in PATH
+		printf("I'm here in the no path argument switch");
+		char *path = getenv("PATH");
+		char *colon = ':';
+		char *token = strtok(path, colon);
+		FILE *file;
+		printf("%s", token);
+		while (token != NULL){
+			 char *path = strcat(token, tokens_get_token(tokens, 0));
+			if ( access(path, F_OK) == 0){	
+				printf("Found executable in the path");
+				printf("%s", token);
+				if (execv(token, target) < 0) {
+                        		printf("Got argument as an executable. Command doesn't exist");
+                		}
+			}
+			token = strtok(NULL, colon);
+		}printf("executable not found ");
+	}
+        }
       else{// waiting for child to terminate 
+	printf("I'm in the parent process");
         wait(NULL);
+	tcsetpgrp(0, getpgid(getpid()));
+	printf("I'm in the parent process2\n");
        }
       
 
