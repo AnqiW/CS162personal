@@ -148,7 +148,7 @@ int main(unused int argc, unused char *argv[]) {
       
       
       for(int i=0; i<length;i++ ){
-	    target[i] = tokens_get_token(tokens, i);
+      target[i] = tokens_get_token(tokens, i);
         if (strcmp(target[i], ">") == 0){
           carrot = ">";
         }
@@ -177,17 +177,24 @@ int main(unused int argc, unused char *argv[]) {
       // check the first token if / exists there.
       // If / is there, the first argument is a path
       if (strchr(tokens_get_token(tokens, 0), '/')){
+        
         //fprintf(stderr, "Got argument as a path\n");
-        if( strcmp(carrot, ">") == 0){
-          int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
-          dup2(fd, 1);
-          carrot = NULL;
-          close(fd);
-          }
+        
 
-        if( strcmp(carrot, "<") == 0){
-          target[length-2] = filename;
-          }  
+        if (carrot != NULL){
+          if( strcmp(carrot, ">") == 0){
+            int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
+            dup2(fd, 1);
+            carrot = NULL;
+            close(fd);
+            }
+
+
+          if( strcmp(carrot, "<") == 0){
+            target[length-2] = filename;
+            }  
+        }
+
 
         pid_t pid = fork();
         if (pid == 0){
@@ -199,19 +206,20 @@ int main(unused int argc, unused char *argv[]) {
         }
       }else{ // this means the first token is not a path, so loof for it in PATH
 
-        if( strcmp(carrot, ">") == 0){
-          int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
-          dup2(fd, 1);
-          carrot = NULL;
-          close(fd);
-          } 
+        if (carrot != NULL){
+          if( strcmp(carrot, ">") == 0){
+            int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
+            dup2(fd, 1);
+            carrot = NULL;
+            close(fd);
+            } 
 
 
-        if( strcmp(carrot, "<") == 0){
-          target[length-2] = filename;
-          }  
+          if( strcmp(carrot, "<") == 0){
+            target[length-2] = filename;
+            }  
 
-
+        }
 
         char *path = getenv("PATH");
         //printf("the PATH ENV is : \n ");
