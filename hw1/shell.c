@@ -185,7 +185,6 @@ int main(unused int argc, unused char *argv[]) {
           if( strcmp(carrot, ">") == 0){
             int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
             dup2(fd, 1);
-            carrot = NULL;
             close(fd);
             }
 
@@ -210,7 +209,6 @@ int main(unused int argc, unused char *argv[]) {
           if( strcmp(carrot, ">") == 0){
             int fd = open(filename, O_CREAT | O_TRUNC| O_WRONLY, 0666);
             dup2(fd, 1);
-            carrot = NULL;
             close(fd);
             } 
 
