@@ -197,6 +197,12 @@ int main(unused int argc, unused char *argv[]) {
 
         pid_t pid = fork();
         if (pid == 0){
+
+          pid_t pgrp = getpgrp();
+          tcsetpgrp(0, pgrp);
+
+
+
           if (execv(target[0], target) < 0) { 
             fprintf(stderr, "Command doesn't exist"); 
           }
@@ -246,6 +252,13 @@ int main(unused int argc, unused char *argv[]) {
             //printf("the final path finally is: %s", fin_path);
             pid_t pid = fork();
             if (pid == 0){
+
+              pid_t pgrp = getpgrp();
+              tcsetpgrp(0, pgrp);
+
+
+
+
               if (execv(fin_path, target) < 0) {
                 //fprintf(stderr,"Got argument as an executable. execv failed");
               }
