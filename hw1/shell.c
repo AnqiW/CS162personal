@@ -207,6 +207,10 @@ int main(unused int argc, unused char *argv[]) {
             fprintf(stderr, "Command doesn't exist"); 
           }
         }else if (pid >0){
+
+
+          signal(SIGINT,SIG_IGN);
+
           wait(NULL);
         }
       }else{ // this means the first token is not a path, so loof for it in PATH
@@ -264,6 +268,10 @@ int main(unused int argc, unused char *argv[]) {
               }
 
             }else if (pid >0){
+
+              signal(SIGINT,SIG_IGN);
+
+              
               wait(NULL);
             }
           }
