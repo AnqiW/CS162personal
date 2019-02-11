@@ -145,6 +145,7 @@ int main(unused int argc, unused char *argv[]) {
       char *filename;
       char *carrot = NULL;
       
+      int is_background = 0;
       
       
       for(int i=0; i<length;i++ ){
@@ -165,6 +166,13 @@ int main(unused int argc, unused char *argv[]) {
         target[length-2] = NULL;
       }
 
+      
+      if (target[length-1] != NULL){
+        if(strcmp(target[length-1], "&") == 0){
+          is_background = 1;
+          target[length-1] = NULL;
+        }
+      }
       //_________Debugging Use__________
       /*
       for (int i = 0; i< length+1; i++){
@@ -199,7 +207,9 @@ int main(unused int argc, unused char *argv[]) {
         if (pid == 0){
 
           pid_t pgrp = getpgrp();
-          tcsetpgrp(0, pgrp);
+          if(is_background == 0){
+            tcsetpgrp(0, pgrp);
+          }
 
 
 
@@ -258,7 +268,9 @@ int main(unused int argc, unused char *argv[]) {
             if (pid == 0){
 
               pid_t pgrp = getpgrp();
-              tcsetpgrp(0, pgrp);
+              if(is_background == 0){
+                tcsetpgrp(0, pgrp);
+              }
 
 
 
@@ -271,7 +283,7 @@ int main(unused int argc, unused char *argv[]) {
 
               signal(SIGINT,SIG_IGN);
 
-              
+
               wait(NULL);
             }
           }
