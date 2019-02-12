@@ -213,7 +213,7 @@ int main(unused int argc, unused char *argv[]) {
         if (pid == 0){
 
           //setpgrp();
-          setpgid(0, 0);
+          //setpgid(0, 0);
           pid_t pgrp = getpgrp();
           if(is_background == 0){
             tcsetpgrp(0, pgrp);
@@ -289,7 +289,7 @@ int main(unused int argc, unused char *argv[]) {
               //setpgrp();
 
 
-              setpgid(0, 0);
+              //setpgid(0, 0);
               pid_t pgrp = getpgrp();
               if(is_background == 0){
                 tcsetpgrp(0, pgrp);
