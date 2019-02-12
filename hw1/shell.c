@@ -227,9 +227,9 @@ int main(unused int argc, unused char *argv[]) {
 
 
 
-        
-          tcsetpgrp(shell_terminal, shell_pgid);
-          
+          if(is_background == 0){
+            tcsetpgrp(shell_terminal, shell_pgid);
+          }
 
 
 
@@ -300,9 +300,9 @@ int main(unused int argc, unused char *argv[]) {
               signal(SIGINT,SIG_IGN);
               
 
-              
-              tcsetpgrp(shell_terminal, shell_pgid);
-              
+              if(is_background == 0){
+                tcsetpgrp(shell_terminal, shell_pgid);
+              }
 
               wait(NULL);
             }
