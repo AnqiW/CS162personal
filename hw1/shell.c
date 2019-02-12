@@ -212,7 +212,7 @@ int main(unused int argc, unused char *argv[]) {
         
         if (pid == 0){
 
-          setpgrp();
+          //setpgrp();
           pid_t pgrp = getpgrp();
           if(is_background == 0){
             tcsetpgrp(0, pgrp);
@@ -224,6 +224,13 @@ int main(unused int argc, unused char *argv[]) {
             fprintf(stderr, "Command doesn't exist"); 
           }
         }else if (pid >0){
+
+
+
+          if(is_background ==1){
+            tcsetpgrp(shell_terminal, shell_pgid);
+          }
+
 
 
           signal(SIGINT,SIG_IGN);
@@ -274,7 +281,7 @@ int main(unused int argc, unused char *argv[]) {
             pid_t pid = fork();
             if (pid == 0){
 
-              setpgrp();
+              //setpgrp();
 
               pid_t pgrp = getpgrp();
               if(is_background == 0){
@@ -291,7 +298,11 @@ int main(unused int argc, unused char *argv[]) {
             }else if (pid >0){
 
               signal(SIGINT,SIG_IGN);
+              
 
+              if(is_background ==1){
+                tcsetpgrp(shell_terminal, shell_pgid);
+              }
 
               wait(NULL);
             }
