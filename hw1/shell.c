@@ -84,7 +84,9 @@ int cmd_cd(unused struct tokens *tokens){
 }
 
 int cmd_wait(unused struct tokens *tokens){
-  wait(NULL);
+  int status = 0;
+  pid_t wpid;
+  while ((wpid = wait(&status)) > 0);
   return 0;
 }
 
