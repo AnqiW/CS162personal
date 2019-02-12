@@ -229,13 +229,17 @@ int main(unused int argc, unused char *argv[]) {
 
           if(is_background == 0){
             tcsetpgrp(shell_terminal, shell_pgid);
+            signal(SIGINT,SIG_IGN);
           }
 
+          else{
+            signal(SIGINT,SIG_IGN);
+            wait(NULL);
+          }
 
+          
 
-          signal(SIGINT,SIG_IGN);
-
-          wait(NULL);
+          
         }
       }else{ // this means the first token is not a path, so loof for it in PATH
 
@@ -297,14 +301,16 @@ int main(unused int argc, unused char *argv[]) {
 
             }else if (pid >0){
 
-              signal(SIGINT,SIG_IGN);
               
-
               if(is_background == 0){
                 tcsetpgrp(shell_terminal, shell_pgid);
+                signal(SIGINT,SIG_IGN);
               }
 
-              wait(NULL);
+              else{
+                signal(SIGINT,SIG_IGN);
+                wait(NULL);
+              }
             }
           }
           token = strtok(NULL, ":");        
