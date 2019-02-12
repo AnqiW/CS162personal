@@ -209,8 +209,10 @@ int main(unused int argc, unused char *argv[]) {
 
 
         pid_t pid = fork();
+        
         if (pid == 0){
 
+          setpgrp();
           pid_t pgrp = getpgrp();
           if(is_background == 0){
             tcsetpgrp(0, pgrp);
@@ -271,6 +273,8 @@ int main(unused int argc, unused char *argv[]) {
             //printf("the final path finally is: %s", fin_path);
             pid_t pid = fork();
             if (pid == 0){
+
+              setpgrp();
 
               pid_t pgrp = getpgrp();
               if(is_background == 0){
