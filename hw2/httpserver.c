@@ -78,9 +78,8 @@ void handle_files_request(int fd) {
   // set content-type header
   if(is_file){
     //printf("%s", "I'm here in is_file=1 condition");
-    char *ctheader = http_get_mime_type(request->path);
     http_start_response(fd, 200);
-    http_send_header(fd, "Content-Type", ctheader);
+    http_send_header(fd, "Content-Type", http_get_mime_type(request->path));
     http_end_headers(fd);
     
     char read_buff[1024];
