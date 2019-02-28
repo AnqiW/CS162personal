@@ -51,28 +51,33 @@ void handle_files_request(int fd) {
    */
 
   struct http_request *request = http_request_parse(fd);
+
+  http_start_response(fd, 200);
+  
   // get the final path the user requested.
-  printf("%s", "server_files_directory is ");
-  printf("%s", server_files_directory);
+  //printf("%s", "server_files_directory is ");
+  //printf("%s", server_files_directory);
   char *path = malloc(strlen(server_files_directory) + strlen(request->path) + 1); 
   strcpy(path, server_files_directory);
   strcat(path, request->path);
-  printf("%s", "+++++++++++++++++++++++++++++++++++++++++++++ \n");
-  printf("%s", path);
+  //printf("%s", "+++++++++++++++++++++++++++++++++++++++++++++ \n");
+  //printf("%s", path);
    
   // check the given argument is a filename or a directory or 
   
   int is_file = 0;
+  int is_direc = 0;
   struct stat newstat;
   stat(path, &newstat);
   is_file = S_ISREG(newstat.st_mode);
+  is_direc = S_ISDIR(newstat.st_mode);
  // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
   
   // 1) If user requested an existing file, respond with the file
   // check whether exist 
   // set content-type header
   if(is_file){
-    printf("%s", "I'm here in is_file=1 condition");
+    //printf("%s", "I'm here in is_file=1 condition");
     char *ctheader = http_get_mime_type(request->path);
     http_start_response(fd, 200);
     http_send_header(fd, "Content-Type", ctheader);
@@ -81,18 +86,18 @@ void handle_files_request(int fd) {
     char read_buff[1024];
     //open the file as fd
     int sourcefd = open(path, O_RDONLY, 0666);
-    while(read(path, read_buff, sizeof(read_buff))){
-      http_send_data(sourcefd, read_buff, sizeof(read_buff));
+    while(read(sourcefd, read_buff, sizeof(read_buff))){
+      http_send_data(fd, read_buff, sizeof(read_buff));
     }
-  }else{
-    printf("%s", "I'm here in is_file = 0 condition");
+  }else if(is_direc){
+    //printf("%s", "I'm here in is_file = 0 condition");
     //need to tell if it is the case that the file doesn't exist
     char *ultpath = malloc(strlen(path) + strlen("/index.html") + 2);
     //strcpy(ultpath, "/");
     strcpy(ultpath, path);
-    strcat(ultpath, "index.html");
+    strcat(ultpath, "/index.html");
     
-    printf("%s", ultpath);
+    //printf("%s", ultpath);
 
     struct stat new2stat;
     int not_exist = stat(ultpath, &new2stat);
@@ -102,27 +107,46 @@ void handle_files_request(int fd) {
       http_send_header(fd, "Content-type", "text/html");
       http_end_headers(fd);
       
-    char read_buff[1024];
-    //open the file as fd
-    int sourcefd = open(ultpath, O_RDONLY, 0666);
-    while(read(ultpath, read_buff, sizeof(read_buff))){
-      http_send_data(sourcefd, read_buff, sizeof(read_buff));
+      char read_buff[1024];
+      //open the file as fd
+      int sourcefd = open(ultpath, O_RDONLY, 0666);
+      while(read(sourcefd, read_buff, sizeof(read_buff))){
+        http_send_data(fd, read_buff, sizeof(read_buff));
       }
     }else{
-      printf("%s", "I'm here in else condition");
       // file doesn't exist or directory doesn't contatin .html
       // throw children and a link to the parent directory
       http_start_response(fd, 200);
       http_send_header(fd, "Content-Type", "text/html");
       http_end_headers(fd);
+
+      // get the current directory adn print out all the entries
+
+
+      
+      struct dirent *rDir;
+      DIR *oDir;
+      oDir = opendir (path);
+      while ((rDir = readdir(oDir)) != NULL) {
+            http_send_string(fd, "<html><body><a href='/'>rDir->d_name</a></body></html>");
+        }
+      closedir(oDir);
+      
+
       http_send_string(fd,
       "<center>"
       "<h1>Welcome to httpserver!</h1>"
       "<hr>"
-      "<p>Nothing's here yet.</p>"
+      "<p>Else condition.</p>"
       "</center>");
+      http_send_string(fd, "<html><body><a href='/'>Home</a></body></html>");
 
     }
+  }else{
+    //return 404 notfound 
+    http_send_header(fd, "Content-Type", "text/html");
+    http_end_headers(fd);
+    http_get_response_message(404);
   }
 
 
