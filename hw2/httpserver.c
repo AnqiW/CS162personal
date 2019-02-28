@@ -52,51 +52,75 @@ void handle_files_request(int fd) {
 
   struct http_request *request = http_request_parse(fd);
   // get the final path the user requested.
-  char *dir_path = server_files_directory;
-  char *path = malloc(strlen(dir_path) + strlen(request->path) + 1); 
-  strcpy(path, dir_path);
+  printf("%s", "server_files_directory is ");
+  printf("%s", server_files_directory);
+  char *path = malloc(strlen(server_files_directory) + strlen(request->path) + 1); 
+  strcpy(path, server_files_directory);
   strcat(path, request->path);
+  printf("%s", "+++++++++++++++++++++++++++++++++++++++++++++ \n");
+  printf("%s", path);
    
   // check the given argument is a filename or a directory or 
-  FILE *file;
+  
   int is_file = 0;
-  if (file = fopen(path, "r")){
-      fclose(file);
-      is_file = 1;
-  } // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
+  struct stat newstat;
+  stat(path, &newstat);
+  is_file = S_ISREG(newstat.st_mode);
+ // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
   
   // 1) If user requested an existing file, respond with the file
   // check whether exist 
   // set content-type header
   if(is_file){
+    printf("%s", "I'm here in is_file=1 condition");
     char *ctheader = http_get_mime_type(request->path);
+    http_start_response(fd, 200);
     http_send_header(fd, "Content-Type", ctheader);
     http_end_headers(fd);
-    http_start_response(fd, 200);
-    char read_buff[7810];
+    
+    char read_buff[1024];
     //open the file as fd
     int sourcefd = open(path, O_RDONLY, 0666);
     while(read(path, read_buff, sizeof(read_buff))){
       http_send_data(sourcefd, read_buff, sizeof(read_buff));
     }
   }else{
+    printf("%s", "I'm here in is_file = 0 condition");
     //need to tell if it is the case that the file doesn't exist
-    char *ultpath = malloc(strlen(path) + strlen("/index.html") + 1);
-    if (file = fopen(ultpath, "r")){
+    char *ultpath = malloc(strlen(path) + strlen("/index.html") + 2);
+    //strcpy(ultpath, "/");
+    strcpy(ultpath, path);
+    strcat(ultpath, "index.html");
+    
+    printf("%s", ultpath);
+
+    struct stat new2stat;
+    int not_exist = stat(ultpath, &new2stat);
+   
+    if (!not_exist){
+      http_start_response(fd, 200);
       http_send_header(fd, "Content-type", "text/html");
       http_end_headers(fd);
-      http_start_response(fd, 200);
-    char read_buff[7810];
+      
+    char read_buff[1024];
     //open the file as fd
     int sourcefd = open(ultpath, O_RDONLY, 0666);
     while(read(ultpath, read_buff, sizeof(read_buff))){
       http_send_data(sourcefd, read_buff, sizeof(read_buff));
-    }
-      fclose(file);
+      }
     }else{
+      printf("%s", "I'm here in else condition");
       // file doesn't exist or directory doesn't contatin .html
       // throw children and a link to the parent directory
-
+      http_start_response(fd, 200);
+      http_send_header(fd, "Content-Type", "text/html");
+      http_end_headers(fd);
+      http_send_string(fd,
+      "<center>"
+      "<h1>Welcome to httpserver!</h1>"
+      "<hr>"
+      "<p>Nothing's here yet.</p>"
+      "</center>");
 
     }
   }
