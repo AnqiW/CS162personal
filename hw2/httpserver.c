@@ -79,7 +79,7 @@ void handle_files_request(int fd) {
   if(is_file){
     //printf("%s", "I'm here in is_file=1 condition");
     http_start_response(fd, 200);
-    http_send_header(fd, "Content-type", http_get_mime_type(request->path));
+    http_send_header(fd, "Content-Type", http_get_mime_type(request->path));
     http_end_headers(fd);
     
     char read_buff[1024];
@@ -103,7 +103,7 @@ void handle_files_request(int fd) {
    
     if (!not_exist){
       http_start_response(fd, 200);
-      http_send_header(fd, "Content-type", http_get_mime_type("index.html"));
+      http_send_header(fd, "Content-Type", "text/html");
       http_end_headers(fd);
       
       char read_buff[1024];
@@ -116,7 +116,7 @@ void handle_files_request(int fd) {
       // file doesn't exist or directory doesn't contatin .html
       // throw children and a link to the parent directory
       http_start_response(fd, 200);
-      http_send_header(fd, "Content-type", http_get_mime_type("index.html"));
+      http_send_header(fd, "Content-Type", "text/html");
       http_end_headers(fd);
 
       // get the current directory adn print out all the entries
@@ -143,7 +143,7 @@ void handle_files_request(int fd) {
     }
   }else{
     //return 404 notfound 
-    http_send_header(fd, "Content-type", http_get_mime_type("index.html"));
+    http_send_header(fd, "Content-Type", "text/html");
     http_end_headers(fd);
     http_get_response_message(404);
   }
