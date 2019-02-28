@@ -52,7 +52,7 @@ void handle_files_request(int fd) {
 
   struct http_request *request = http_request_parse(fd);
   // get the final path the user requested.
-  char *dir_path = *server_files_directory;
+  char *dir_path = server_files_directory;
   char *path = malloc(strlen(dir_path) + strlen(request->path) + 1); 
   strcpy(path, dir_path);
   strcat(path, request->path);
@@ -60,7 +60,7 @@ void handle_files_request(int fd) {
   // check the given argument is a filename or a directory or 
   FILE *file;
   int is_file = 0;
-  if (file = fopen(filename, "r")){
+  if (file = fopen(path, "r")){
       fclose(file);
       is_file = 1;
   } // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
@@ -69,7 +69,7 @@ void handle_files_request(int fd) {
   // check whether exist 
   // set content-type header
   if(is_file){
-    char *ctheader = http_get_mime_type(request->path)
+    char *ctheader = http_get_mime_type(request->path);
     http_send_header(fd, "Content-Type", ctheader);
     http_end_headers(fd);
     http_start_response(fd, 200);
@@ -82,13 +82,13 @@ void handle_files_request(int fd) {
   }else{
     //need to tell if it is the case that the file doesn't exist
     char *ultpath = malloc(strlen(path) + strlen("/index.html") + 1);
-    if (file = fopen(filename, "r")){
+    if (file = fopen(ultpath, "r")){
       http_send_header(fd, "Content-type", "text/html");
       http_end_headers(fd);
       http_start_response(fd, 200);
     char read_buff[7810];
     //open the file as fd
-    int sourcefd = open(ulypath, O_RDONLY, 0666);
+    int sourcefd = open(ultpath, O_RDONLY, 0666);
     while(read(ultpath, read_buff, sizeof(read_buff))){
       http_send_data(sourcefd, read_buff, sizeof(read_buff));
     }
@@ -96,7 +96,7 @@ void handle_files_request(int fd) {
     }else{
       // file doesn't exist or directory doesn't contatin .html
       // throw children and a link to the parent directory
-      
+
 
     }
   }
@@ -105,6 +105,7 @@ void handle_files_request(int fd) {
 
   
   // set content-type header
+  /*
   char *ctheader = http_get_mime_type(request->path)
   http_send_header(fd, "Content-Type", ctheader);
   http_end_headers(fd);
@@ -114,6 +115,7 @@ void handle_files_request(int fd) {
       "<hr>"
       "<p>Nothing's here yet.</p>"
       "</center>");
+  */
 }
 
 
