@@ -103,7 +103,7 @@ void handle_files_request(int fd) {
    
     if (!not_exist){
       http_start_response(fd, 200);
-      http_send_header(fd, "Content-Type", "text/html");
+      http_send_header(fd, "Content-type", http_get_mime_type("index.html"));
       http_end_headers(fd);
       
       char read_buff[1024];
