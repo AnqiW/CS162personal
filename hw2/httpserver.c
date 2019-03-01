@@ -52,7 +52,7 @@ void handle_files_request(int fd) {
 
   struct http_request *request = http_request_parse(fd);
 
-  http_start_response(fd, 200);
+  
   
   // get the final path the user requested.
   //printf("%s", "server_files_directory is ");
@@ -65,33 +65,39 @@ void handle_files_request(int fd) {
    
   // check the given argument is a filename or a directory or 
   
-  int is_file = 0;
-  int is_direc = 0;
+
   struct stat newstat;
   stat(path, &newstat);
-  is_file = S_ISREG(newstat.st_mode);
-  is_direc = S_ISDIR(newstat.st_mode);
- // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
+
+  // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
   
   // 1) If user requested an existing file, respond with the file
   // check whether exist 
   // set content-type header
-  if(is_file){
+  if(S_ISREG(newstat.st_mode)){
     //printf("%s", "I'm here in is_file=1 condition");
     http_start_response(fd, 200);
-    http_send_header(fd, "Content-Type", http_get_mime_type(request->path));
-    http_end_headers(fd);
+    
+    
+    int filesize;
     
     char read_buff[1024];
     //open the file as fd
-    int sourcefd = open(path, O_RDONLY, 0666);
-    while(read(sourcefd, read_buff, sizeof(read_buff))){
-      http_send_data(fd, read_buff, sizeof(read_buff));
+    int sourcefd = open(path, O_RDONLY);
+    filesize = lseek(sourcefd, (size_t)0, SEEK_END);
+    lseek(sourcefd, (size_t)0, SEEK_SET);
+    char fs[1024];
+    sprintf(fs, "%d", filesize);
+    http_send_header(fd, "Content-Type", http_get_mime_type(request->path));
+    http_send_header(fd, "Content-Length", fs);
+    http_end_headers(fd);
+    while(read(sourcefd, read_buff, 1024 * sizeof(char))){
+      http_send_data(fd, read_buff, 1024 * sizeof(char));
     }
-  }else if(is_direc){
+  }else if(S_ISDIR(newstat.st_mode)){
     //printf("%s", "I'm here in is_file = 0 condition");
     //need to tell if it is the case that the file doesn't exist
-    char *ultpath = malloc(strlen(path) + strlen("/index.html") + 2);
+    char *ultpath = malloc(strlen(path) + strlen("/index.html") + 1);
     //strcpy(ultpath, "/");
     strcpy(ultpath, path);
     strcat(ultpath, "/index.html");
@@ -103,12 +109,25 @@ void handle_files_request(int fd) {
    
     if (!not_exist){
       http_start_response(fd, 200);
-      http_send_header(fd, "Content-Type", "text/html");
-      http_end_headers(fd);
+
+      //use lseek to get the length of the required file  
+      
+      int filesize;
+
       
       char read_buff[1024];
-      //open the file as fd
-      int sourcefd = open(ultpath, O_RDONLY, 0666);
+      //open the file as fd 
+      int sourcefd = open(ultpath, O_RDONLY);
+
+      filesize =lseek(sourcefd, (size_t)0, SEEK_END);
+      lseek(sourcefd, (size_t)0, SEEK_SET);
+      char fs[1024];
+      sprintf(fs, "%d", filesize);
+
+      http_send_header(fd, "Content-Length", fs);
+      http_send_header(fd, "Content-Type", "text/html");
+      http_end_headers(fd);
+
       while(read(sourcefd, read_buff, sizeof(read_buff))){
         http_send_data(fd, read_buff, sizeof(read_buff));
       }
@@ -127,6 +146,8 @@ void handle_files_request(int fd) {
       DIR *oDir;
       oDir = opendir (path);
       while ((rDir = readdir(oDir)) != NULL) {
+            //direference outside here 
+
             http_send_string(fd, "<html><body><a href='/'>rDir->d_name</a></body></html>");
         }
       closedir(oDir);
@@ -143,9 +164,10 @@ void handle_files_request(int fd) {
     }
   }else{
     //return 404 notfound 
+    http_start_response(fd, 404);
     http_send_header(fd, "Content-Type", "text/html");
     http_end_headers(fd);
-    http_get_response_message(404);
+    http_send_string(fd, "");
   }
 
 
