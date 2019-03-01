@@ -67,7 +67,12 @@ void handle_files_request(int fd) {
   
 
   struct stat newstat;
-  stat(path, &newstat);
+  if (stat(path, &newstat) == -1){
+    http_start_response(fd, 404);
+    http_send_header(fd, "Content-Type", "text/html");
+    http_end_headers(fd);
+    http_send_string(fd, "");  
+  } else{
 
   // Problem: the prob is that derectory and nonexist file will all fall into is_file = 0 
   
@@ -147,18 +152,14 @@ void handle_files_request(int fd) {
       oDir = opendir (path);
       while ((rDir = readdir(oDir)) != NULL) {
             //direference outside here 
-
-            http_send_string(fd, "<html><body><a href='/'>rDir->d_name</a></body></html>");
+            char *fname = rDir->d_name;
+            char *link = malloc(strlen("<html><body><a href='/'>") + strlen("</a></body></html>") +strlen(fname)+ 1);
+            strcpy(link, "<html><body><a href='/'>");
+            strcat(link, fname);
+            strcat(link, "</a></body></html>");
+            http_send_string(fd, link);
         }
       closedir(oDir);
-      
-
-      http_send_string(fd,
-      "<center>"
-      "<h1>Welcome to httpserver!</h1>"
-      "<hr>"
-      "<p>Else condition.</p>"
-      "</center>");
       http_send_string(fd, "<html><body><a href='/'>Home</a></body></html>");
 
     }
@@ -185,6 +186,7 @@ void handle_files_request(int fd) {
       "<p>Nothing's here yet.</p>"
       "</center>");
   */
+}
 }
 
 
