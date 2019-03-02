@@ -110,7 +110,9 @@ void handle_files_request(int fd) {
     //printf("%s", ultpath);
 
     struct stat new2stat;
-    int not_exist = stat(ultpath, &new2stat);
+    int not_exist =
+
+     stat(ultpath, &new2stat);
    
     if (!not_exist){
       http_start_response(fd, 200);
@@ -153,8 +155,10 @@ void handle_files_request(int fd) {
       while ((rDir = readdir(oDir)) != NULL) {
             //direference outside here 
             char *fname = rDir->d_name;
-            char *link = malloc(strlen("<html><body><a href='/'>") + strlen("</a></body></html>") +strlen(fname)+ 1);
-            strcpy(link, "<html><body><a href='/'>");
+            char *link = malloc(strlen("<html><body><a href='/'>") + strlen("</a></body></html>") + 2*strlen(fname)+ 1);
+            strcpy(link, "<html><body><a href='");
+            strcat(link, fname);
+            strcat(link, "'>");
             strcat(link, fname);
             strcat(link, "</a></body></html>");
             http_send_string(fd, link);
