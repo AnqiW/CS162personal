@@ -252,13 +252,54 @@ void handle_proxy_request(int fd) {
   * TODO: Your solution for task 3 belongs here! 
   */
 }
+//This part is still part two!!!!!**********************************
+void *handle_routine(void *request_handler){
+  //lock acquire before check condition
+  pthread_mutex_lock(&work_queue.lock);
+  // while condition not satisfied 
+  while(!(wq_get_size(&work_queue)<0)){
+    if(wq_get_size(&work_queue)>0){
+      int request_fd = wq_pop(&work_queue);
+      void (*request_handler)(int) = request_handler;
+      request_handler(request_fd);
+      pthread_mutex_unlock(&work_queue.lock);
+    } else if(wq_get_size(&work_queue) == 0){
+      pthread_cond_wait(&work_queue.cond_var, &work_queue.lock);
+    }
+  }
+  pthread_mutex_unlock(&work_queue.lock);
+
+}
+
+
+
+ 
+ 
 
 
 void init_thread_pool(int num_threads, void (*request_handler)(int)) {
   /*
    * TODO: Part of your solution for Task 2 goes here!
    */
+
+   //malloc thread pool
+   pthread_t *thread_pool = malloc(num_threads * sizeof(pthread_t));
+   //create thread iteratively
+   while (num_threads != 0){
+    // create thread and call the handaler
+    // working queue is a monitor of the threads?
+    //int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
+                          //void *(*start_routine) (void *), void *arg);
+    //int result;
+    if ( pthread_create(thread_pool, NULL, *handle_routine, (void *) request_handler)){
+      printf("%s", "thread_creation failed");
+    }
+    thread_pool++;
+    num_threads -=1;
+   }
+
 }
+
 
 /*
  * Opens a TCP stream socket on all interfaces with port number PORTNO. Saves
