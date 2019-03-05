@@ -278,6 +278,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
 
    //malloc thread pool
    int counter = 0;
+   wq_init(&work_queue);
    pthread_t thread[num_threads];
    //create thread iteratively
    while (counter < num_threads){
