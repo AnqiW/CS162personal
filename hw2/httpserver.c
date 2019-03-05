@@ -287,6 +287,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
     //int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                           //void *(*start_routine) (void *), void *arg);
     //int result;
+    thread_pool++;
     if ( pthread_create(thread_pool, NULL, &handle_routine, (void *) request_handler)){
       printf("%s", "thread_creation failed");
     }
