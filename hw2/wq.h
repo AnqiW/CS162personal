@@ -18,7 +18,7 @@ typedef struct wq {
   /* TODO: More stuff here, maybe? */
 
   pthread_cond_t cond_var;
-  pthread_mutex_t lock;
+  pthread_mutex_t wqlock;
 } wq_t;
 
 void wq_init(wq_t *wq);

@@ -10,13 +10,15 @@ void wq_init(wq_t *wq) {
   wq->size = 0;
   wq->head = NULL;
 
-  pthread_mutex_init(&(wq->lock), NULL);
+  pthread_mutex_init(&(wq->wqlock), NULL);
   pthread_cond_init(&(wq->cond_var), NULL);
 }
 //I added it here
 int wq_get_size(wq_t *wq){
   return wq->size;
 }
+
+
 
 /* Remove an item from the WQ. This function should block until there
  * is at least one item on the queue. */
