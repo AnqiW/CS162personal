@@ -216,12 +216,23 @@ void *proxy_read_routine(void *fds){
   char read_buff[1024];
 
   while(read(sfd, read_buff, sizeof(read_buff))){
-      write(ofd, read_buff, sizeof(read_buff));
+      http_send_data(ofd, read_buff, sizeof(read_buff));
     }
   close(sfd);
   close(ofd);
 }
 //_________Angie put it here----------------
+
+
+struct routine_input {
+  int ofd;
+  int sfd;
+}routine_input;
+
+
+
+
+
 void handle_proxy_request(int fd) {
 
   /*
@@ -272,13 +283,21 @@ void handle_proxy_request(int fd) {
   pthread_t A_to_B;
   pthread_t B_to_A;
   int clientfd = client_socket_fd;
-  int fds[3];
-  fds[0] = fd;
-  fds[1] = clientfd;
-  pthread_create(&A_to_B, NULL, &proxy_read_routine, (void *)fds);
-  fds[1] = fd;
-  fds[0] = clientfd;
-  pthread_create(&B_to_A, NULL, &proxy_read_routine, (void *)fds);
+  struct routine_input *args = malloc( sizeof(struct routine_input));
+  args->sfd = fd;
+  args->ofd = clientfd;
+  
+  //try struct 
+  //int *fds = malloc( 3* sizeof(int));
+  //fds[0] = fd;
+  //fds[1] = clientfd;
+  pthread_create(&A_to_B, NULL, &proxy_read_routine, (void *)args);
+  //fds[1] = fd;
+  //fds[0] = clientfd;
+  args->ofd = fd;
+  args->sfd = clientfd;
+  pthread_create(&B_to_A, NULL, &proxy_read_routine, (void *)args);
+
   pthread_join(A_to_B, NULL);
   pthread_join(B_to_A, NULL);
 
