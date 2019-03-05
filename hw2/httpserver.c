@@ -221,11 +221,17 @@ void *proxy_read_routine(void *fds){
 
   int sfd = fdss->sfd;
   int ofd = fdss->ofd;
+  int byte_read;
   char read_buff[1024];
 
-  while(read(sfd, read_buff, sizeof(read_buff))>0){
-      write(ofd, read_buff, sizeof(read_buff));
+  while(1){
+    byte_read = read(sfd, read_buff, 1024)>0;
+    if (byte_read <= 0){
+      break;
     }
+    write(ofd, read_buff, byte_read);
+  }
+    
   close(sfd);
   close(ofd);
   return NULL;
