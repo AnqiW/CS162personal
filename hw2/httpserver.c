@@ -256,6 +256,8 @@ void handle_proxy_request(int fd) {
 void *handle_routine(void *request_hand){
   //lock acquire before check condition
   pthread_mutex_lock(&work_queue.wqlock);
+  printf("%s", "current work queue size is");
+  printf("%d", (wq_get_size(&work_queue)));
   // while condition not satisfied 
   while((wq_get_size(&work_queue)<=0)){
       pthread_cond_wait(&work_queue.cond_var, &work_queue.wqlock);
@@ -279,20 +281,22 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
    */
 
    //malloc thread pool
+   int counter = num_threads;
    pthread_t *thread_pool = malloc(num_threads * sizeof(pthread_t));
    //create thread iteratively
-   while (num_threads != 0){
+   while (counter != 0){
     // create thread and call the handaler
     // working queue is a monitor of the threads?
     //int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                           //void *(*start_routine) (void *), void *arg);
     //int result;
+    printf("%s", "creating thread *");
+    printf("%s", thread_pool);
     thread_pool++;
     if ( pthread_create(thread_pool, NULL, &handle_routine, (void *) request_handler)){
       printf("%s", "thread_creation failed");
     }
-    thread_pool++;
-    num_threads -=1;
+    counter-=1;
    }
 
 }
@@ -358,15 +362,20 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
     // TODO: Change me?
     //***********************************Altered here*******************
     // enqueue to work queue 
+    printf("%s", "num_threads is ");
+    printf("%d", num_threads);
     if (num_threads < 1) {
       // ase in original code
       request_handler(client_socket_number);
       close(client_socket_number);
     } else {
+      printf("%s", "in the else case num_thread>1");
       pthread_mutex_lock(&work_queue.wqlock);
       //critical section
       wq_push(&work_queue, client_socket_number);
-      pthread_cond_signal(&work_queue.cond_var);
+      printf("%s", "current work queue size is");
+      printf("%d", (wq_get_size(&work_queue)));
+      pthread_cond_broadcast(&work_queue.cond_var);
       //critical section ends
       pthread_mutex_unlock(&work_queue.wqlock);
     }
