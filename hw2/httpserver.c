@@ -375,7 +375,7 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
       wq_push(&work_queue, client_socket_number);
       printf("%s", "current work queue size is");
       printf("%d", (wq_get_size(&work_queue)));
-      pthread_cond_broadcast(&work_queue.cond_var);
+      pthread_cond_signal(&work_queue.cond_var);
       //critical section ends
       pthread_mutex_unlock(&work_queue.wqlock);
     }
