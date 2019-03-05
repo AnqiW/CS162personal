@@ -255,15 +255,15 @@ void handle_proxy_request(int fd) {
 //This part is still part two!!!!!**********************************
 void *handle_routine(void *request_hand){
   //lock acquire before check condition
-  pthread_mutex_lock(&work_queue.lock);
+  pthread_mutex_lock(&work_queue.wqlock);
   // while condition not satisfied 
   while((wq_get_size(&work_queue)<=0)){
-      pthread_cond_wait(&work_queue.cond_var, &work_queue.lock);
+      pthread_cond_wait(&work_queue.cond_var, &work_queue.wqlock);
     }
   int request_fd = wq_pop(&work_queue);
   void (*request_handler)(int) = request_hand;
   request_handler(request_fd);
-  pthread_mutex_unlock(&work_queue.lock);
+  pthread_mutex_unlock(&work_queue.wqlock);
 
 }
 
@@ -356,8 +356,23 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
         client_address.sin_port);
 
     // TODO: Change me?
-    request_handler(client_socket_number);
-    close(client_socket_number);
+    //***********************************Altered here*******************
+    // enqueue to work queue 
+    if (num_threads < 1) {
+      // ase in original code
+      request_handler(client_socket_number);
+      close(client_socket_number);
+    } else {
+      pthread_mutex_lock(&work_queue.wqlock);
+      //critical section
+      wq_push(&work_queue, client_socket_number);
+      pthread_cond_signal(&work_queue.cond_var);
+      //critical section ends
+      pthread_mutex_unlock(&work_queue.wqlock);
+    }
+
+    //***********************************Altered here***********************
+    
 
     printf("Accepted connection from %s on port %d\n",
         inet_ntoa(client_address.sin_addr),
