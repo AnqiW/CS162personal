@@ -271,21 +271,16 @@ void *handle_routine(void *request_hand){
 }
 
 
-
- 
- 
-
-
 void init_thread_pool(int num_threads, void (*request_handler)(int)) {
   /*
    * TODO: Part of your solution for Task 2 goes here!
    */
 
    //malloc thread pool
-   int counter = num_threads;
-   pthread_t thread;
+   int counter = 0;
+   pthread_t thread[num_threads];
    //create thread iteratively
-   while (counter != 0){
+   while (counter < num_threads){
     // create thread and call the handaler
     // working queue is a monitor of the threads?
     //int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
@@ -294,10 +289,10 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
     printf("%s", "creating thread *");
     //printf("%s", thread_pool);
     //thread_pool++;
-    if ( pthread_create(&thread, NULL, &handle_routine, (void *) request_handler)){
+    if ( pthread_create(&thread[counter], NULL, &handle_routine, (void *) request_handler)){
       printf("%s", "thread_creation failed");
     }
-    counter-=1;
+    counter++;
    }
 
 }
@@ -371,14 +366,10 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
       close(client_socket_number);
     } else {
       printf("%s", "in the else case num_thread>1");
-      //pthread_mutex_lock(&work_queue.wqlock);
-      //critical section
       wq_push(&work_queue, client_socket_number);
       printf("%s", "current work queue size is");
       printf("%d", (wq_get_size(&work_queue)));
       pthread_cond_signal(&work_queue.cond_var);
-      //critical section ends
-      //pthread_mutex_unlock(&work_queue.wqlock);
     }
 
     //***********************************Altered here***********************
