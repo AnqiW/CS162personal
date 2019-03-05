@@ -283,7 +283,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
 
    //malloc thread pool
    int counter = num_threads;
-   pthread_t *thread_pool = malloc(num_threads * sizeof(pthread_t));
+   pthread_t thread;
    //create thread iteratively
    while (counter != 0){
     // create thread and call the handaler
@@ -292,9 +292,9 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
                           //void *(*start_routine) (void *), void *arg);
     //int result;
     printf("%s", "creating thread *");
-    printf("%s", thread_pool);
-    thread_pool++;
-    if ( pthread_create(thread_pool, NULL, &handle_routine, (void *) request_handler)){
+    //printf("%s", thread_pool);
+    //thread_pool++;
+    if ( pthread_create(&thread, NULL, &handle_routine, (void *) request_handler)){
       printf("%s", "thread_creation failed");
     }
     counter-=1;
