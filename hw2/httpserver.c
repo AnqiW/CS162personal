@@ -208,7 +208,7 @@ void handle_files_request(int fd) {
 
 
 
-//_________Angie put it here----------------
+//_________I put it here----------------
 void *proxy_read_routine(void *fds){
   int *fdss = (int*) fds;
   int sfd = fdss[0];
@@ -221,7 +221,7 @@ void *proxy_read_routine(void *fds){
   close(sfd);
   close(ofd);
 }
-//_________Angie put it here----------------
+//_________I put it here----------------
 
 
 struct routine_input {
@@ -323,11 +323,13 @@ void *handle_routine(void *request_hand){
   while((wq_get_size(&work_queue)<=0)){
       pthread_cond_wait(&work_queue.cond_var, &work_queue.wqlock);
     }
+  if(wq_get_size(&work_queue)>=1){
   int request_fd = wq_pop(&work_queue);
   void (*request_handler)(int) = request_hand;
   request_handler(request_fd);
   pthread_mutex_unlock(&work_queue.wqlock);
-}
+    }
+  }
 }
 void init_thread_pool(int num_threads, void (*request_handler)(int)) {
   /*
@@ -429,7 +431,7 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
       wq_push(&work_queue, client_socket_number);
       printf("%s", "current work queue size is");
       printf("%d", (wq_get_size(&work_queue)));
-      pthread_cond_broadcast(&work_queue.cond_var);
+      
     }
 
     //***********************************Altered here***********************
