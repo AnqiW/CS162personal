@@ -32,6 +32,9 @@ char *server_proxy_hostname;
 int server_proxy_port;
 
 
+
+
+
 /*
  * Reads an HTTP request from stream (fd), and writes an HTTP response
  * containing:
@@ -220,6 +223,7 @@ void *proxy_read_routine(void *fds){
     }
   close(sfd);
   close(ofd);
+  return NULL;
 }
 //_________I put it here----------------
 
@@ -315,19 +319,17 @@ void handle_proxy_request(int fd) {
 //This part is still part two!!!!!**********************************
 void *handle_routine(void *request_hand){
   //lock acquire before check condition
-  pthread_mutex_lock(&work_queue.wqlock);
+  
   //printf("%s", "current work queue size is");
   //printf("%d", (wq_get_size(&work_queue)));
   // while condition not satisfied 
   while(1){
-  while((wq_get_size(&work_queue)<=0)){
-      pthread_cond_wait(&work_queue.cond_var, &work_queue.wqlock);
-    }
+
 
   int request_fd = wq_pop(&work_queue);
   void (*request_handler)(int) = request_hand;
   request_handler(request_fd);
-  pthread_mutex_unlock(&work_queue.wqlock);
+
   close(request_fd);
   }
 }
@@ -339,7 +341,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
    //malloc thread pool
    int counter = 0;
    wq_init(&work_queue);
-   pthread_t thread[num_threads];
+   pthread_t *thread = malloc(num_threads * sizeof(pthread_t));
    //create thread iteratively
    while (counter < num_threads){
     // create thread and call the handaler
