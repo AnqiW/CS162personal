@@ -205,6 +205,23 @@ void handle_files_request(int fd) {
  *   | client | <-> | httpserver | <-> | proxy target |
  *   +--------+     +------------+     +--------------+
  */
+
+
+
+//_________Angie put it here----------------
+void *proxy_read_routine(void *fds){
+  int *fdss = (int*) fds;
+  int sfd = fdss[0];
+  int ofd = fdss[1];
+  char read_buff[1024];
+
+  while(read(sfd, read_buff, sizeof(read_buff))){
+      write(ofd, read_buff, sizeof(read_buff));
+    }
+  close(sfd);
+  close(ofd);
+}
+//_________Angie put it here----------------
 void handle_proxy_request(int fd) {
 
   /*
@@ -251,7 +268,31 @@ void handle_proxy_request(int fd) {
   /* 
   * TODO: Your solution for task 3 belongs here! 
   */
+  //create two threads, one from A to A, one from B to A.
+  pthread_t A_to_B;
+  pthread_t B_to_A;
+  int clientfd = client_socket_fd;
+  int fds[3];
+  fds[0] = fd;
+  fds[1] = clientfd;
+  pthread_create(&A_to_B, NULL, &proxy_read_routine, (void *)fds);
+  fds[1] = fd;
+  fds[0] = clientfd;
+  pthread_create(&B_to_A, NULL, &proxy_read_routine, (void *)fds);
+  pthread_join(A_to_B, NULL);
+  pthread_join(B_to_A, NULL);
+
 }
+
+
+
+
+//+++++++++++++++=end of part 3+++++++++++++++++++++++
+
+
+
+
+
 //This part is still part two!!!!!**********************************
 void *handle_routine(void *request_hand){
   //lock acquire before check condition
@@ -269,8 +310,6 @@ void *handle_routine(void *request_hand){
   pthread_mutex_unlock(&work_queue.wqlock);
 }
 }
-
-
 void init_thread_pool(int num_threads, void (*request_handler)(int)) {
   /*
    * TODO: Part of your solution for Task 2 goes here!
@@ -297,6 +336,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
    }
 
 }
+
 
 
 /*
