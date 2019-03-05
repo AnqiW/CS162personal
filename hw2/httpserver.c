@@ -224,7 +224,7 @@ void *proxy_read_routine(void *fds){
   char read_buff[1024];
 
   while(read(sfd, read_buff, sizeof(read_buff))>0){
-      http_send_data(ofd, read_buff, sizeof(read_buff));
+      write(ofd, read_buff, sizeof(read_buff));
     }
   close(sfd);
   close(ofd);
