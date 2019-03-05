@@ -44,4 +44,5 @@ void wq_push(wq_t *wq, int client_socket_fd) {
   wq_item->client_socket_fd = client_socket_fd;
   DL_APPEND(wq->head, wq_item);
   wq->size++;
+  pthread_cond_broadcast(&(wq->cond_var));
 }
