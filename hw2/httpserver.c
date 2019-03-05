@@ -225,7 +225,7 @@ void *proxy_read_routine(void *fds){
   char read_buff[1024];
 
   while(1){
-    byte_read = read(sfd, read_buff, 1024)>0;
+    byte_read = read(sfd, read_buff, 1024);
     if (byte_read <= 0){
       break;
     }
