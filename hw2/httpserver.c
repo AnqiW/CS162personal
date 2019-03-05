@@ -209,16 +209,21 @@ void handle_files_request(int fd) {
  *   +--------+     +------------+     +--------------+
  */
 
-
+struct routine_input {
+  int ofd;
+  int sfd;
+}routine_input;
 
 //_________I put it here----------------
 void *proxy_read_routine(void *fds){
-  int *fdss = (int*) fds;
-  int sfd = fdss[0];
-  int ofd = fdss[1];
+  struct routine_input *fdss = (struct routine_input *) fds;
+
+
+  int sfd = fdss->sfd;
+  int ofd = fdss->ofd;
   char read_buff[1024];
 
-  while(read(sfd, read_buff, sizeof(read_buff))){
+  while(read(sfd, read_buff, sizeof(read_buff))>0){
       http_send_data(ofd, read_buff, sizeof(read_buff));
     }
   close(sfd);
@@ -228,10 +233,7 @@ void *proxy_read_routine(void *fds){
 //_________I put it here----------------
 
 
-struct routine_input {
-  int ofd;
-  int sfd;
-};
+
 
 
 
@@ -287,20 +289,21 @@ void handle_proxy_request(int fd) {
   pthread_t A_to_B;
   pthread_t B_to_A;
   int clientfd = client_socket_fd;
-  struct routine_input *args = malloc( sizeof(struct routine_input));
-  args->sfd = fd;
-  args->ofd = clientfd;
+  struct routine_input *args1 = malloc( sizeof(struct routine_input));
+  args1->sfd = fd;
+  args1->ofd = clientfd;
   
   //try struct 
   //int *fds = malloc( 3* sizeof(int));
   //fds[0] = fd;
   //fds[1] = clientfd;
-  pthread_create(&A_to_B, NULL, &proxy_read_routine, (void *)args);
+  pthread_create(&A_to_B, NULL, &proxy_read_routine, (void *)args1);
   //fds[1] = fd;
   //fds[0] = clientfd;
-  args->ofd = fd;
-  args->sfd = clientfd;
-  pthread_create(&B_to_A, NULL, &proxy_read_routine, (void *)args);
+  struct routine_input *args2 = malloc( sizeof(struct routine_input));
+  args2->ofd = fd;
+  args2->sfd = clientfd;
+  pthread_create(&B_to_A, NULL, &proxy_read_routine, (void *)args2);
 
   pthread_join(A_to_B, NULL);
   pthread_join(B_to_A, NULL);
