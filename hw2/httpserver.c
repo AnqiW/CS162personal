@@ -256,9 +256,10 @@ void handle_proxy_request(int fd) {
 void *handle_routine(void *request_hand){
   //lock acquire before check condition
   pthread_mutex_lock(&work_queue.wqlock);
-  printf("%s", "current work queue size is");
-  printf("%d", (wq_get_size(&work_queue)));
+  //printf("%s", "current work queue size is");
+  //printf("%d", (wq_get_size(&work_queue)));
   // while condition not satisfied 
+  while(1){
   while((wq_get_size(&work_queue)<=0)){
       pthread_cond_wait(&work_queue.cond_var, &work_queue.wqlock);
     }
@@ -266,7 +267,7 @@ void *handle_routine(void *request_hand){
   void (*request_handler)(int) = request_hand;
   request_handler(request_fd);
   pthread_mutex_unlock(&work_queue.wqlock);
-
+}
 }
 
 
@@ -370,14 +371,14 @@ void serve_forever(int *socket_number, void (*request_handler)(int)) {
       close(client_socket_number);
     } else {
       printf("%s", "in the else case num_thread>1");
-      pthread_mutex_lock(&work_queue.wqlock);
+      //pthread_mutex_lock(&work_queue.wqlock);
       //critical section
       wq_push(&work_queue, client_socket_number);
       printf("%s", "current work queue size is");
       printf("%d", (wq_get_size(&work_queue)));
       pthread_cond_signal(&work_queue.cond_var);
       //critical section ends
-      pthread_mutex_unlock(&work_queue.wqlock);
+      //pthread_mutex_unlock(&work_queue.wqlock);
     }
 
     //***********************************Altered here***********************
