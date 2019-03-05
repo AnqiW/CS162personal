@@ -253,20 +253,16 @@ void handle_proxy_request(int fd) {
   */
 }
 //This part is still part two!!!!!**********************************
-void *handle_routine(void *request_handler){
+void *handle_routine(void *request_hand){
   //lock acquire before check condition
   pthread_mutex_lock(&work_queue.lock);
   // while condition not satisfied 
-  while(!(wq_get_size(&work_queue)<0)){
-    if(wq_get_size(&work_queue)>0){
-      int request_fd = wq_pop(&work_queue);
-      void (*request_handler)(int) = request_handler;
-      request_handler(request_fd);
-      pthread_mutex_unlock(&work_queue.lock);
-    } else if(wq_get_size(&work_queue) == 0){
+  while((wq_get_size(&work_queue)<=0)){
       pthread_cond_wait(&work_queue.cond_var, &work_queue.lock);
     }
-  }
+  int request_fd = wq_pop(&work_queue);
+  void (*request_handler)(int) = request_hand;
+  request_handler(request_fd);
   pthread_mutex_unlock(&work_queue.lock);
 
 }
@@ -291,7 +287,7 @@ void init_thread_pool(int num_threads, void (*request_handler)(int)) {
     //int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
                           //void *(*start_routine) (void *), void *arg);
     //int result;
-    if ( pthread_create(thread_pool, NULL, *handle_routine, (void *) request_handler)){
+    if ( pthread_create(thread_pool, NULL, &handle_routine, (void *) request_handler)){
       printf("%s", "thread_creation failed");
     }
     thread_pool++;
