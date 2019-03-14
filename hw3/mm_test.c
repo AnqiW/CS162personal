@@ -37,8 +37,9 @@ void load_alloc_functions() {
 
 int main() {
     load_alloc_functions();
-
+    printf("finished load");
     int *data = (int*) mm_malloc(sizeof(int));
+    printf("Should have finished malloc");
     assert(data != NULL);
     data[0] = 0x162;
     mm_free(data);
