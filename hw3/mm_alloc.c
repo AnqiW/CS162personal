@@ -8,10 +8,12 @@
 #include "mm_alloc.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <dlfcn.h>
 #include <stdio.h>
-#include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <string.h>
+
 
 struct metadata *head_metadata = NULL;
 struct metadata{
@@ -22,9 +24,11 @@ struct metadata{
 }metadata;
 
 void *mm_malloc(size_t size) {
+  fprintf(stderr, "I'm here in mm_mallloc");
   //Return NULL if the requested size is 0.
   if (size == (size_t) 0 ){
     //printf("I'm returning here!");
+    fprintf(stderr, "size 0 NUll");
     return NULL;
   }
   // Get the break bound of the heap
@@ -35,18 +39,22 @@ void *mm_malloc(size_t size) {
     return NULL;
   }
 
+
+
   if(head_metadata == NULL){
-    //-----------------------------------------WHen the heap is empty --------------------
     // Set the base to the current place
-    head_metadata = curr_meta;
+
+    head_metadata = sbrk(0);
   // The heap is empty in this case
   //check whether the size of meta+ size of mem will surpass hard limit
     struct rlimit rlim;
-    if (getrlimit(RLIMIT_AS,&rlim) <  (int)sizeof(struct metadata)+ size){
+    if (getrlimit(RLIMIT_AS,&rlim)<  sizeof(struct metadata)+ size){
+      //printf(getrlimit(2));
+      fprintf(stderr, "size pass har limit return Null");
       return NULL;
     }
     //set break to contain the entire new mem
-    void * addr = sbrk(size+ sizeof(struct metadata));
+    sbrk(size+ sizeof(struct metadata));
     // create metadata
     struct metadata *md = head_metadata;
     md->prev = NULL;
@@ -55,13 +63,10 @@ void *mm_malloc(size_t size) {
     md->size = size;
 
     //zero fill
-    memset(addr + sizeof(struct metadata), 0, size);
-    return addr + sizeof(struct metadata);
-    //---------------------------------------------When the heap is empty-----------------------=
-  }
-
-
-  else{
+    memset(head_metadata + sizeof(struct metadata), 0, size);
+    fprintf(stderr, "inistialize the heap return address");
+    return head_metadata + sizeof(struct metadata);
+  } else{
 
     // the case when the heap is not empty
 
@@ -85,14 +90,10 @@ void *mm_malloc(size_t size) {
 
         //update index-meta and return
         index_meta -> free = 0;
-        //check whether we need to pad the allocted memory.
-        /*
-        if (index_meta-> size >size){
-          //do memset?
-          memset(index_meta+sizeof(metadata)+size, 0, index_meta -> size-size);
-        }*/
 
         memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
+
+        fprintf(stderr, "return address found sufficient space");
         return index_meta+sizeof(metadata);
       }
       index_meta = index_meta->next;
@@ -102,6 +103,7 @@ void *mm_malloc(size_t size) {
     curr_meta = sbrk(0);
     struct rlimit rlim;
     if (getrlimit(RLIMIT_AS,&rlim) <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
+      fprintf(stderr, "already iterate through the heap, not space found, cannot expend, return Null");
       return NULL;
     }
     //use sbrk to creae more space on the heap
@@ -113,23 +115,14 @@ void *mm_malloc(size_t size) {
     md->size = size;
 
     memset(curr_meta + sizeof(struct metadata), 0, size);
+    fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
 
     return curr_meta + sizeof(struct metadata);
 
   }
-
-
-
-
   }
-
     /* YOUR CODE HERE */
     // First Fit, Start from the bottom(start_of_heap)of the heap and search up.
-
-
-
-
-
 void *mm_realloc(void *ptr, size_t size) {
     /* YOUR CODE HERE */
     return NULL;
