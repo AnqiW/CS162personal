@@ -8,6 +8,10 @@
 #include "mm_alloc.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 struct metadata *head_metadata = NULL;
 struct metadata{
@@ -18,32 +22,31 @@ struct metadata{
 }metadata;
 
 void *mm_malloc(size_t size) {
-  printf("I'm here");
   //Return NULL if the requested size is 0.
   if (size == (size_t) 0 ){
     //printf("I'm returning here!");
-    printf("returning 1");
     return NULL;
   }
   // Get the break bound of the heap
   struct metadata *curr_meta;
   curr_meta = (struct metadata *)sbrk(0);
   // Get the hard limit of the heap
-
+  if(curr_meta== (void*)-1){
+    return NULL;
+  }
 
   if(head_metadata == NULL){
+    //-----------------------------------------WHen the heap is empty --------------------
     // Set the base to the current place
-
-    head_metadata = sbrk(0);
+    head_metadata = curr_meta;
   // The heap is empty in this case
   //check whether the size of meta+ size of mem will surpass hard limit
-    if (getrlimit(2) <  sizeof(struct metadata)+ size){
-      //printf(getrlimit(2));
-      printf("returning 2");
+    struct rlimit rlim;
+    if (getrlimit(RLIMIT_AS,&rlim) <  (int)sizeof(struct metadata)+ size){
       return NULL;
     }
     //set break to contain the entire new mem
-    sbrk(size+ sizeof(struct metadata));
+    void * addr = sbrk(size+ sizeof(struct metadata));
     // create metadata
     struct metadata *md = head_metadata;
     md->prev = NULL;
@@ -52,10 +55,13 @@ void *mm_malloc(size_t size) {
     md->size = size;
 
     //zero fill
-    memset(head_metadata + sizeof(struct metadata), 0, size);
-    printf("returning 3");
-    return head_metadata + sizeof(struct metadata);
-  } else{
+    memset(addr + sizeof(struct metadata), 0, size);
+    return addr + sizeof(struct metadata);
+    //---------------------------------------------When the heap is empty-----------------------=
+  }
+
+
+  else{
 
     // the case when the heap is not empty
 
@@ -87,8 +93,6 @@ void *mm_malloc(size_t size) {
         }*/
 
         memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
-
-        printf("returning 4");
         return index_meta+sizeof(metadata);
       }
       index_meta = index_meta->next;
@@ -96,8 +100,8 @@ void *mm_malloc(size_t size) {
     //if we are here we didn't find a sufficient space to put the a;locted memory
     //check hard_limit first
     curr_meta = sbrk(0);
-    if (getrlimit(2) <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
-      printf("returning 4.5");
+    struct rlimit rlim;
+    if (getrlimit(RLIMIT_AS,&rlim) <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
       return NULL;
     }
     //use sbrk to creae more space on the heap
@@ -109,7 +113,6 @@ void *mm_malloc(size_t size) {
     md->size = size;
 
     memset(curr_meta + sizeof(struct metadata), 0, size);
-    printf("returning 5");
 
     return curr_meta + sizeof(struct metadata);
 

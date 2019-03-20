@@ -36,11 +36,11 @@ void load_alloc_functions() {
 }
 
 int main() {
+    fprintf(stderr,"I'm here in main");
     load_alloc_functions();
-    printf("finished load");
-    int *data = (int*) mm_malloc(sizeof(int));
+    int *data = (int*) mm_malloc(sizeof(int)*1);
     printf("Should have finished malloc");
-    assert(data != NULL);
+    assert(data == NULL);
     data[0] = 0x162;
     mm_free(data);
     printf("malloc test successful!\n");
