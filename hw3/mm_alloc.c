@@ -143,19 +143,27 @@ void mm_free(void *ptr) {
     struct metadata * need_to_free = (struct metadata *) ptr;
     need_to_free->free = 1;
     // check whether need to colasce
-    if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
-      need_to_free->prev->next = need_to_free->next->next;
-      need_to_free->next->next->prev = need_to_free->prev;
-      need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
-    } else if (need_to_free->prev->free == 1){
-      //prev is free next is not mm_free
-      need_to_free->prev->next = need_to_free->next;
-      need_to_free->next->prev = need_to_free->prev;
-      need_to_free->prev->size += need_to_free->size;
-    }else if (need_to_free->next->free == 1){
-      need_to_free->next->next->prev = need_to_free;
-      need_to_free->next = need_to_free->next->next;
-      need_to_free->size += need_to_free->next->size;
+    if (need_to_free->prev != NULL && need_to_free->next !=NULL){
+      if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
+        need_to_free->prev->next = need_to_free->next->next;
+        need_to_free->next->next->prev = need_to_free->prev;
+        need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
+        return
     }
-    return;
+    if (need_to_free->next != NULL){
+      if(need_to_free->next->free == 1){
+        need_to_free->next->next->prev = need_to_free;
+        need_to_free->next = need_to_free->next->next;
+        need_to_free->size += need_to_free->next->size;
+        return;
+      }
+    }
+    if (need_to_free->prev != NULL){
+      if(need_to_free->prev->free == 1){
+        need_to_free->prev->next = need_to_free->next;
+        need_to_free->next->prev = need_to_free->prev;
+        need_to_free->prev->size += need_to_free->size;
+        return;
+      }
+    }
 }
