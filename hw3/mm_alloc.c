@@ -41,7 +41,6 @@ void *mm_malloc(size_t size) {
   }
 
 
-
   if(head_metadata == NULL){
     // Set the base to the current place
     fprintf(stderr, "in head_metadata == NULL condition \n ");
