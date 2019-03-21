@@ -57,6 +57,7 @@ void *mm_malloc(size_t size) {
       fprintf(stderr, "size pass hard limit return Null");
       return NULL;
     }
+    fprintf(stderr, "before sbrk\n");
     //set break to contain the entire new mem
     sbrk(size+ sizeof(struct metadata));
     // create metadata
@@ -68,7 +69,7 @@ void *mm_malloc(size_t size) {
 
     //zero fill
     memset(head_metadata + sizeof(struct metadata), 0, size);
-    fprintf(stderr, "inistialize the heap return address");
+    fprintf(stderr, "inistialize the heap, return address\n");
     return head_metadata + sizeof(struct metadata);
   } else{
 
@@ -137,13 +138,16 @@ void *mm_realloc(void *ptr, size_t size) {
 }
 
 void mm_free(void *ptr) {
+  fprintf(stderr, "I'm here in Free");
     if (ptr == NULL){
       return ;
     }
-    struct metadata * need_to_free = (struct metadata *) ptr;
+    struct metadata * need_to_free = (struct metadata *) ptr-sizeof(struct metadata);
     need_to_free->free = 1;
     // check whether need to colasce
+    fprintf(stderr, "Before condition 1 ");
     if (need_to_free->prev != NULL && need_to_free->next !=NULL){
+      fprintf(stderr, "In condition 1 ");
       if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
         need_to_free->prev->next = need_to_free->next->next;
         need_to_free->next->next->prev = need_to_free->prev;
@@ -151,7 +155,9 @@ void mm_free(void *ptr) {
         return;
       }
     }
+    fprintf(stderr, "Before condition 2 ");
     if (need_to_free->next != NULL){
+      fprintf(stderr, "In condition 2 ");
       if(need_to_free->next->free == 1){
         need_to_free->next->next->prev = need_to_free;
         need_to_free->next = need_to_free->next->next;
@@ -159,7 +165,9 @@ void mm_free(void *ptr) {
         return;
       }
     }
+    fprintf(stderr, "Before condition 3 ");
     if (need_to_free->prev != NULL){
+      fprintf(stderr, "In condition 3 ");
       if(need_to_free->prev->free == 1){
         need_to_free->prev->next = need_to_free->next;
         need_to_free->next->prev = need_to_free->prev;
@@ -167,4 +175,5 @@ void mm_free(void *ptr) {
         return;
       }
     }
+    fprintf(stderr, "After conditions");
 }
