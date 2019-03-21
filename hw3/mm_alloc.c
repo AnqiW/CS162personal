@@ -24,7 +24,7 @@ struct metadata{
 }metadata;
 
 void *mm_malloc(size_t size) {
-  fprintf(stderr, "I'm here in mm_mallloc");
+  fprintf(stderr, "I'm here in mm_mallloc\n");
   //Return NULL if the requested size is 0.
   if (size == (size_t) 0 ){
     //printf("I'm returning here!");
@@ -33,6 +33,7 @@ void *mm_malloc(size_t size) {
   }
   // Get the break bound of the heap
   struct metadata *curr_meta;
+  fprintf(stderr, "before sbrk\n");
   curr_meta = (struct metadata *)sbrk(0);
   // Get the hard limit of the heap
   if(curr_meta== (void*)-1){
@@ -43,14 +44,19 @@ void *mm_malloc(size_t size) {
 
   if(head_metadata == NULL){
     // Set the base to the current place
-
-    head_metadata = sbrk(0);
+    fprintf(stderr, "in head_metadata == NULL condition \n ");
+    head_metadata = curr_meta;
   // The heap is empty in this case
   //check whether the size of meta+ size of mem will surpass hard limit
     struct rlimit rlim;
-    if (getrlimit(RLIMIT_AS,&rlim)<  sizeof(struct metadata)+ size){
-      //printf(getrlimit(2));
-      fprintf(stderr, "size pass har limit return Null");
+    fprintf(stderr, "after struct\n");
+    if(getrlimit(RLIMIT_AS, &rlim) < 0){
+      fprintf(stderr, "getrlimit(RLIMIT_AS, &rlim) < 0");
+      return NULL;
+    }
+    if (rlim.rlim_cur <  sizeof(struct metadata)+ size){
+      fprintf(stderr,"%d", rlim.rlim_cur);
+      fprintf(stderr, "size pass hard limit return Null");
       return NULL;
     }
     //set break to contain the entire new mem
@@ -102,7 +108,8 @@ void *mm_malloc(size_t size) {
     //check hard_limit first
     curr_meta = sbrk(0);
     struct rlimit rlim;
-    if (getrlimit(RLIMIT_AS,&rlim) <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
+    getrlimit(RLIMIT_AS,&rlim);
+    if ( rlim.rlim_cur <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
       fprintf(stderr, "already iterate through the heap, not space found, cannot expend, return Null");
       return NULL;
     }
@@ -120,6 +127,7 @@ void *mm_malloc(size_t size) {
     return curr_meta + sizeof(struct metadata);
 
   }
+
   }
     /* YOUR CODE HERE */
     // First Fit, Start from the bottom(start_of_heap)of the heap and search up.
