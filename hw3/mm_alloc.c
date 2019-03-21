@@ -14,7 +14,6 @@
 #include <sys/resource.h>
 #include <string.h>
 
-
 struct metadata *head_metadata = NULL;
 struct metadata{
   struct metadata *prev;
@@ -39,7 +38,6 @@ void *mm_malloc(size_t size) {
   if(curr_meta== (void*)-1){
     return NULL;
   }
-
 
 
   if(head_metadata == NULL){
@@ -80,7 +78,7 @@ void *mm_malloc(size_t size) {
     struct metadata *index_meta;
     index_meta = head_metadata;
     while( index_meta->next != NULL ){
-      if (index_meta->size > size && index_meta-> free == 1){
+      if (index_meta->size >= size && index_meta-> free == 1){
         // check whether we need to splict the block
         if(index_meta->size-size-2*sizeof(metadata)>0){
           //need to split
@@ -128,6 +126,8 @@ void *mm_malloc(size_t size) {
 
   }
 
+
+
   }
     /* YOUR CODE HERE */
     // First Fit, Start from the bottom(start_of_heap)of the heap and search up.
@@ -137,5 +137,25 @@ void *mm_realloc(void *ptr, size_t size) {
 }
 
 void mm_free(void *ptr) {
-    /* YOUR CODE HERE */
+    if (ptr == NULL){
+      return ;
+    }
+    struct metadata * need_to_free = (struct metadata *) ptr;
+    need_to_free->free = 1;
+    // check whether need to colasce
+    if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
+      need_to_free->prev->next = need_to_free->next->next;
+      need_to_free->next->next->prev = need_to_free->prev;
+      need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
+    } else if (need_to_free->prev->free == 1){
+      //prev is free next is not mm_free
+      need_to_free->prev->next = need_to_free->next;
+      need_to_free->next->prev = need_to_free->prev;
+      need_to_free->prev->size += need_to_free->size;
+    }else if (need_to_free->next->free == 1){
+      need_to_free->next->next->prev = need_to_free;
+      need_to_free->next = need_to_free->next->next;
+      need_to_free->size += need_to_free->next->size;
+    }
+    return;
 }
