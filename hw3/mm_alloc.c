@@ -148,7 +148,8 @@ void mm_free(void *ptr) {
         need_to_free->prev->next = need_to_free->next->next;
         need_to_free->next->next->prev = need_to_free->prev;
         need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
-        return
+        return;
+      }
     }
     if (need_to_free->next != NULL){
       if(need_to_free->next->free == 1){
