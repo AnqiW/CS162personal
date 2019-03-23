@@ -159,7 +159,7 @@ void *mm_malloc(size_t size) {
     md->size = size;
 
     memset(curr_meta + sizeof(struct metadata), 0, size);
-    fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
+    //fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
 
     return curr_meta + sizeof(struct metadata);
 
