@@ -62,15 +62,16 @@ void *mm_malloc(size_t size) {
     //set break to contain the entire new mem
     sbrk(size+ sizeof(struct metadata));
     // create metadata
-    struct metadata *md = head_metadata;
-    md->prev = NULL;
-    md->next = NULL;
-    md->free = 0;
-    md->size = size;
+    //struct metadata *md = head_metadata;
+    head_metadata->prev = NULL;
+    head_metadata->next = NULL;
+    head_metadata->free = 0;
+    head_metadata->size = (int)size;
 
     //zero fill
     memset(head_metadata + sizeof(struct metadata), 0, size);
     fprintf(stderr, "inistialize the heap, return address\n");
+    fprintf(stderr, " head_meta's size is %d\n", head_metadata->size );
     fprintf(stderr, "head_metadata is %d \n", (int*) head_metadata);
     return head_metadata + sizeof(struct metadata);
   } else{
@@ -81,11 +82,13 @@ void *mm_malloc(size_t size) {
     struct metadata *index_meta;
     index_meta = head_metadata;
     fprintf(stderr, "Before iteration \n");
+    fprintf(stderr, " head_meta's size is%d\n", head_metadata->size );
     fprintf(stderr, "index_meta = heda_meta which is %d", (int*)index_meta);
+
     while(index_meta!= NULL){
-      fprintf(stderr, " size requesting is%s\n",size );
-      fprintf(stderr, " index_meta's size is%s\n", index_meta->size );
-      fprintf(stderr, " index_meta's is_free is%s\n", index_meta-> free );
+      fprintf(stderr, " size requesting is%d\n",size );
+      fprintf(stderr, " index_meta's size is%d\n", index_meta->size );
+      fprintf(stderr, " index_meta's is_free is%d\n", index_meta-> free );
       if (index_meta->size >= size && index_meta-> free == 1){
         // check whether we need to splict the block
         if(index_meta->size-size-2*sizeof(metadata)>0){
