@@ -14,7 +14,7 @@
 #include <sys/resource.h>
 #include <string.h>
 
-struct metadata *head_metadata = NULL;
+static struct metadata *head_metadata = NULL;
 struct metadata{
   struct metadata *prev;
   struct metadata *next;
@@ -30,6 +30,7 @@ void *mm_malloc(size_t size) {
     fprintf(stderr, "size 0 NUll");
     return NULL;
   }
+
   // Get the break bound of the heap
   struct metadata *curr_meta;
   fprintf(stderr, "before sbrk\n");
@@ -70,6 +71,7 @@ void *mm_malloc(size_t size) {
     //zero fill
     memset(head_metadata + sizeof(struct metadata), 0, size);
     fprintf(stderr, "inistialize the heap, return address\n");
+    fprintf(stderr, "head_metadata is %d \n", (int*) head_metadata);
     return head_metadata + sizeof(struct metadata);
   } else{
 
@@ -78,7 +80,12 @@ void *mm_malloc(size_t size) {
     //search for the empty block from the start of the heap which is head meta metadata
     struct metadata *index_meta;
     index_meta = head_metadata;
-    while( index_meta->next != NULL ){
+    fprintf(stderr, "Before iteration \n");
+    fprintf(stderr, "index_meta = heda_meta which is %d", (int*)index_meta);
+    while(index_meta!= NULL){
+      fprintf(stderr, " size requesting is%s\n",size );
+      fprintf(stderr, " index_meta's size is%s\n", index_meta->size );
+      fprintf(stderr, " index_meta's is_free is%s\n", index_meta-> free );
       if (index_meta->size >= size && index_meta-> free == 1){
         // check whether we need to splict the block
         if(index_meta->size-size-2*sizeof(metadata)>0){
@@ -93,16 +100,18 @@ void *mm_malloc(size_t size) {
           index_meta-> size = size;
         }
 
+
         //update index-meta and return
         index_meta -> free = 0;
 
         memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
 
-        fprintf(stderr, "return address found sufficient space");
+        fprintf(stderr, "return address found sufficient space \n");
         return index_meta+sizeof(metadata);
       }
       index_meta = index_meta->next;
     }
+    fprintf(stderr, "I'm here line 114\n" );
     //if we are here we didn't find a sufficient space to put the a;locted memory
     //check hard_limit first
     curr_meta = sbrk(0);
@@ -138,16 +147,17 @@ void *mm_realloc(void *ptr, size_t size) {
 }
 
 void mm_free(void *ptr) {
-  fprintf(stderr, "I'm here in Free");
+  fprintf(stderr, "I'm here in Free\n");
     if (ptr == NULL){
       return ;
     }
     struct metadata * need_to_free = (struct metadata *) ptr-sizeof(struct metadata);
+    fprintf(stderr, "set need_to_free->free to free\n");
     need_to_free->free = 1;
     // check whether need to colasce
-    fprintf(stderr, "Before condition 1 ");
+    fprintf(stderr, "Before condition 1\n");
     if (need_to_free->prev != NULL && need_to_free->next !=NULL){
-      fprintf(stderr, "In condition 1 ");
+      fprintf(stderr, "In condition 1\n");
       if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
         need_to_free->prev->next = need_to_free->next->next;
         need_to_free->next->next->prev = need_to_free->prev;
@@ -155,9 +165,9 @@ void mm_free(void *ptr) {
         return;
       }
     }
-    fprintf(stderr, "Before condition 2 ");
+    fprintf(stderr, "Before condition 2\n");
     if (need_to_free->next != NULL){
-      fprintf(stderr, "In condition 2 ");
+      fprintf(stderr, "In condition 2\n");
       if(need_to_free->next->free == 1){
         need_to_free->next->next->prev = need_to_free;
         need_to_free->next = need_to_free->next->next;
@@ -165,9 +175,9 @@ void mm_free(void *ptr) {
         return;
       }
     }
-    fprintf(stderr, "Before condition 3 ");
+    fprintf(stderr, "Before condition 3\n");
     if (need_to_free->prev != NULL){
-      fprintf(stderr, "In condition 3 ");
+      fprintf(stderr, "In condition 3 \n");
       if(need_to_free->prev->free == 1){
         need_to_free->prev->next = need_to_free->next;
         need_to_free->next->prev = need_to_free->prev;
@@ -175,5 +185,5 @@ void mm_free(void *ptr) {
         return;
       }
     }
-    fprintf(stderr, "After conditions");
+    fprintf(stderr, "After conditions\n");
 }
