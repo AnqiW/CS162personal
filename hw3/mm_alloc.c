@@ -94,14 +94,28 @@ void *mm_malloc(size_t size) {
         // check whether we need to splict the block
         if(index_meta->size-size-sizeof(metadata)>0){
           //need to split
+          //*(block *)head = (block){NULL, NULL, 0, NULL};
+          //((block *)head)->size = 5;
           fprintf(stderr, "need to split the block! \n");
-          struct metadata *new_meta = (struct metadata *) index_meta +sizeof(struct metadata)+size;
-          new_meta-> free = 1;
-          new_meta-> prev = index_meta;
-          new_meta-> next = index_meta->next;
-          new_meta-> size = index_meta->size-size-sizeof(struct metadata);
+          *(struct metadata *) (index_meta +sizeof(struct metadata)+size)=(struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
+            .size=(int)index_meta->size-size-sizeof(struct metadata)};
+          //fprintf(stderr, "new_meta is %d\n", (int*) new_meta);
+          //struct metadata temp = (struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
+          //  .size=(int)index_meta->size-size-sizeof(struct metadata)};
+          //fprintf(stderr, "after created temp" );
+          //fprintf(stderr, "check whether new_meta is null %d\n", new_meta == NULL);
+          //*new_meta = temp;
+          fprintf(stderr, "after initilizing" );
+          //*new_meta = (struct metadata) {.free=1,.prev=index_meta,.next=index_meta->next, .size=(int)index_meta->size-size-sizeof(struct metadata)};
+          //fprintf(stderr, "whether new_meta->next is NULL %d\n");
+          /*
+          new_meta->free = 1;
+          new_meta->prev = index_meta;
+          new_meta->next = index_meta->next;
+          new_meta->size = index_meta->size-size-sizeof(struct metadata);
+          */
           //update index meta
-          index_meta-> next = new_meta;
+          index_meta-> next = (struct metadata *) (index_meta +sizeof(struct metadata)+size);
           index_meta-> size = size;
           fprintf(stderr, "splited the block! \n");
         }
