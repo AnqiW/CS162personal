@@ -14,13 +14,14 @@
 #include <sys/resource.h>
 #include <string.h>
 
-static struct metadata *head_metadata = NULL;
+
 struct metadata{
   struct metadata *prev;
   struct metadata *next;
   int free;
   int size;
 }metadata;
+static struct metadata *head_metadata = NULL;
 
 void *mm_malloc(size_t size) {
   fprintf(stderr, "I'm here in mm_mallloc\n");
@@ -97,8 +98,15 @@ void *mm_malloc(size_t size) {
           //*(block *)head = (block){NULL, NULL, 0, NULL};
           //((block *)head)->size = 5;
           fprintf(stderr, "need to split the block! \n");
-          *(struct metadata *) (index_meta +sizeof(struct metadata)+size)=(struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
+
+          //---------------------------------------------
+
+          *(struct metadata *) ((int)index_meta +(int)sizeof(struct metadata)+(int)size)=(struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
             .size=(int)index_meta->size-size-sizeof(struct metadata)};
+
+            //---------------------------------------
+
+
           //fprintf(stderr, "new_meta is %d\n", (int*) new_meta);
           //struct metadata temp = (struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
           //  .size=(int)index_meta->size-size-sizeof(struct metadata)};
@@ -115,7 +123,8 @@ void *mm_malloc(size_t size) {
           new_meta->size = index_meta->size-size-sizeof(struct metadata);
           */
           //update index meta
-          index_meta-> next = (struct metadata *) (index_meta +sizeof(struct metadata)+size);
+
+          index_meta-> next = (struct metadata *) ((int)index_meta +(int)sizeof(struct metadata)+(int)size);
           index_meta-> size = size;
           fprintf(stderr, "splited the block! \n");
         }
