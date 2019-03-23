@@ -91,7 +91,7 @@ void *mm_malloc(size_t size) {
       fprintf(stderr, " index_meta's is_free is%d\n", index_meta-> free );
       if (index_meta->size >= size && index_meta-> free == 1){
         // check whether we need to splict the block
-        if(index_meta->size-size-2*sizeof(metadata)>0){
+        if(index_meta->size-size-sizeof(metadata)>0){
           //need to split
           struct metadata *new_meta = index_meta +sizeof(struct metadata)+size;
           new_meta-> free = 1;
