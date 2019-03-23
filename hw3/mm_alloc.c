@@ -182,7 +182,7 @@ void mm_free(void *ptr) {
     if (ptr == NULL){
       return ;
     }
-    struct metadata * need_to_free = (struct metadata *) ptr-sizeof(struct metadata);
+    struct metadata * need_to_free = (struct metadata *) (int)ptr-(int)sizeof(struct metadata);
     fprintf(stderr, "set need_to_free->free to free\n");
     need_to_free->free = 1;
     // check whether need to colasce
