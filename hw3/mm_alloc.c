@@ -62,7 +62,9 @@ void *mm_malloc(size_t size) {
     }
     fprintf(stderr, "before sbrk\n");
     //set break to contain the entire new mem
-    sbrk(size+ sizeof(struct metadata));
+    if(sbrk((int)size+ (int)sizeof(struct metadata))== (void*)-1){
+      return NULL;
+    }
     // create metadata
     //struct metadata *md = head_metadata;
     head_metadata->prev = NULL;
@@ -158,8 +160,8 @@ void *mm_malloc(size_t size) {
     md->free = 0;
     md->size = size;
 
-    memset(curr_meta + sizeof(struct metadata), 0, size);
-    fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
+    memset((int)curr_meta + (int)sizeof(struct metadata), 0, size);
+    //fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
 
     return (int)curr_meta + (int)sizeof(struct metadata);
 
