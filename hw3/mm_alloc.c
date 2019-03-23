@@ -75,7 +75,7 @@ void *mm_malloc(size_t size) {
     fprintf(stderr, "inistialize the heap, return address\n");
     fprintf(stderr, " head_meta's size is %d\n", head_metadata->size );
     fprintf(stderr, "head_metadata is %d \n", (int*) head_metadata);
-    return (int)head_metadata + (int)sizeof(struct metadata);
+    return head_metadata + sizeof(struct metadata);
   } else{
 
     // the case when the heap is not empty
@@ -136,7 +136,7 @@ void *mm_malloc(size_t size) {
         memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
 
         fprintf(stderr, "return address found sufficient space \n");
-        return (int)index_meta+(int)sizeof(metadata);
+        return index_meta+sizeof(metadata);
       }
       index_meta = index_meta->next;
     }
@@ -158,8 +158,8 @@ void *mm_malloc(size_t size) {
     md->free = 0;
     md->size = size;
 
-    memset((int)curr_meta +(int) sizeof(struct metadata), 0, size);
-    //fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
+    memset(curr_meta + sizeof(struct metadata), 0, size);
+    fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
 
     return (int)curr_meta + (int)sizeof(struct metadata);
 
@@ -180,7 +180,7 @@ void mm_free(void *ptr) {
     if (ptr == NULL){
       return ;
     }
-    struct metadata * need_to_free = (struct metadata *) (int)ptr-(int)sizeof(struct metadata);
+    struct metadata * need_to_free = (struct metadata *) ptr-sizeof(struct metadata);
     fprintf(stderr, "set need_to_free->free to free\n");
     need_to_free->free = 1;
     // check whether need to colasce
@@ -198,7 +198,9 @@ void mm_free(void *ptr) {
     if (need_to_free->next != NULL){
       fprintf(stderr, "In condition 2\n");
       if(need_to_free->next->free == 1){
-        need_to_free->next->next->prev = need_to_free;
+        if (need_to_free->next->next != NULL){
+          need_to_free->next->next->prev = need_to_free;
+        }
         need_to_free->next = need_to_free->next->next;
         need_to_free->size += need_to_free->next->size;
         return;
