@@ -115,7 +115,7 @@ void *mm_malloc(size_t size) {
         //update index-meta and return
         index_meta -> free = 0;
 
-        memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
+        memset((int)index_meta + (int)sizeof(struct metadata), 0, index_meta ->size);
 
         fprintf(stderr, "return address found sufficient space \n");
         return (int)index_meta+(int)sizeof(metadata);
