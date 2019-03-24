@@ -159,7 +159,31 @@ void *mm_malloc(size_t size) {
     // First Fit, Start from the bottom(start_of_heap)of the heap and search up.
 void *mm_realloc(void *ptr, size_t size) {
     /* YOUR CODE HERE */
-    return NULL;
+    if (size==0 && ptr!= NULL){
+      mm_free(ptr);
+      return NULL;
+    }
+    if (ptr==NULL){
+      return mm_alloc(size);
+    }
+    struct metadata * need_to_resize = (int)ptr-(int)sizeof(struct metadata);
+    //if new size is smaller than the original size, resize the original one.
+    if ((int)size < need_to_resize->size){
+      //create a new block of smaller size s and only copy over the first s bytes
+      struct metadata * new_place = mm_alloc(size);
+      memcpy(new_place, ptr, size);
+      mm_free(ptr);
+    }
+    //if cannot allocate the new requested size, do not modity the original block
+    if (mm_alloc(size)==NULL){
+      return NULL;
+    }
+    //if larger, free and mm_alloc and then memcpy
+    struct metadata * new_place = mm_alloc(size);
+    memcpy(new_place, ptr, need_to_resize->size);
+    mm_free(ptr);
+    return new_place;
+
 }
 
 void mm_free(void *ptr) {
