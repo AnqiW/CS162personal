@@ -141,6 +141,7 @@ void *mm_malloc(size_t size) {
     md->next = NULL;
     md->free = 0;
     md->size = size;
+    last_meta->next = md;
 
     memset((int)curr_meta + (int)sizeof(struct metadata), 0, size);
     fprintf(stderr, "already iterate through the heap, not space found, expend, return addr\n");
@@ -173,26 +174,33 @@ void mm_free(void *ptr) {
     fprintf(stderr, "set need_to_free->free to free\n");
     need_to_free->free = 1;
     fprintf(stderr, "need_to_free->free is %d\n",need_to_free->free );
+    fprintf(stderr, "need_to_free->next is %d\n",need_to_free->next );
     // check whether need to colasce
     fprintf(stderr, "Before condition 1\n");
     if (need_to_free->prev != NULL && need_to_free->next !=NULL){
       fprintf(stderr, "In condition 1\n");
       if (need_to_free->prev->free == 1 && need_to_free->next->free == 1){
+        need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
         need_to_free->prev->next = need_to_free->next->next;
         need_to_free->next->next->prev = need_to_free->prev;
-        need_to_free->prev->size += need_to_free->next->size+need_to_free->size;
+
         return;
       }
     }
     fprintf(stderr, "Before condition 2\n");
     if (need_to_free->next != NULL){
       fprintf(stderr, "In condition 2\n");
+      fprintf(stderr, "need_to_free->free is %d\n",need_to_free->free);
       if(need_to_free->next->free == 1){
+        need_to_free->size += need_to_free->next->size;
         if (need_to_free->next->next != NULL){
           need_to_free->next->next->prev = need_to_free;
         }
+        fprintf(stderr, "Before next\n");
         need_to_free->next = need_to_free->next->next;
-        need_to_free->size += need_to_free->next->size;
+
+
+        fprintf(stderr, "After size");
         return;
       }
     }
@@ -204,11 +212,14 @@ void mm_free(void *ptr) {
       fprintf(stderr, "need_to_free->next is %d\n",need_to_free->next);
       fprintf(stderr, "need_to_free->prev->free  is %d\n",need_to_free->prev->free );
       if(need_to_free->prev->free == 1){
-        need_to_free->prev->next = need_to_free->next;
+        need_to_free->prev->size += need_to_free->size;
+        if (need_to_free->prev->prev != NULL){
+          need_to_free->prev->prev->next = need_to_free->next;
+        }
         if (need_to_free->next!=NULL){
           need_to_free->next->prev = need_to_free->prev;
         }
-        need_to_free->prev->size += need_to_free->size;
+
         fprintf(stderr, "need_to_free->prev->size  is %d\n",need_to_free->prev->size );
         return;
       }
