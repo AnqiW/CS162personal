@@ -75,9 +75,9 @@ void *mm_malloc(size_t size) {
     //zero fill
     memset(head_metadata + sizeof(struct metadata), 0, size);
     fprintf(stderr, "inistialize the heap, return address\n");
-    fprintf(stderr, " head_meta's size is %d\n", head_metadata->size );
+    fprintf(stderr, " head_metadata + sizeof(struct metadata) is %d\n", (int)head_metadata + (int)sizeof(struct metadata) );
     fprintf(stderr, "head_metadata is %d \n", (int*) head_metadata);
-    return head_metadata + sizeof(struct metadata);
+    return (int)head_metadata + (int)sizeof(struct metadata);
   } else{
 
     // the case when the heap is not empty
@@ -85,6 +85,7 @@ void *mm_malloc(size_t size) {
     //search for the empty block from the start of the heap which is head meta metadata
     struct metadata *index_meta;
     index_meta = head_metadata;
+    struct metadata *last_meta;
     fprintf(stderr, "Before iteration \n");
     fprintf(stderr, " head_meta's size is%d\n", head_metadata->size );
     fprintf(stderr, "index_meta = heda_meta which is %d", (int*)index_meta);
@@ -93,43 +94,22 @@ void *mm_malloc(size_t size) {
       fprintf(stderr, " size requesting is%d\n",size );
       fprintf(stderr, " index_meta's size is%d\n", index_meta->size );
       fprintf(stderr, " index_meta's is_free is%d\n", index_meta-> free );
-      if (index_meta->size >= size && index_meta-> free == 1){
-        // check whether we need to splict the block
-        if(index_meta->size-size-sizeof(metadata)>0){
-          //need to split
-          //*(block *)head = (block){NULL, NULL, 0, NULL};
-          //((block *)head)->size = 5;
-          fprintf(stderr, "need to split the block! \n");
 
-          //---------------------------------------------
+      if (index_meta->size >= size && index_meta-> free == 1){
+        // check whether we need to splict the block-------------------------block splitting______________________________
+        if((int)index_meta->size-(int)size-(int)sizeof(metadata)>0){
+
+          fprintf(stderr, "need to split the block! \n");
 
           *(struct metadata *) ((int)index_meta +(int)sizeof(struct metadata)+(int)size)=(struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
             .size=(int)index_meta->size-size-sizeof(struct metadata)};
 
-            //---------------------------------------
-
-
-          //fprintf(stderr, "new_meta is %d\n", (int*) new_meta);
-          //struct metadata temp = (struct metadata){.free=1,.prev=index_meta,.next=index_meta->next,
-          //  .size=(int)index_meta->size-size-sizeof(struct metadata)};
-          //fprintf(stderr, "after created temp" );
-          //fprintf(stderr, "check whether new_meta is null %d\n", new_meta == NULL);
-          //*new_meta = temp;
           fprintf(stderr, "after initilizing" );
-          //*new_meta = (struct metadata) {.free=1,.prev=index_meta,.next=index_meta->next, .size=(int)index_meta->size-size-sizeof(struct metadata)};
-          //fprintf(stderr, "whether new_meta->next is NULL %d\n");
-          /*
-          new_meta->free = 1;
-          new_meta->prev = index_meta;
-          new_meta->next = index_meta->next;
-          new_meta->size = index_meta->size-size-sizeof(struct metadata);
-          */
-          //update index meta
-
           index_meta-> next = (struct metadata *) ((int)index_meta +(int)sizeof(struct metadata)+(int)size);
           index_meta-> size = size;
           fprintf(stderr, "splited the block! \n");
         }
+        //----------------------------------block spliting__________________________________________________-
 
 
         //update index-meta and return
@@ -138,8 +118,9 @@ void *mm_malloc(size_t size) {
         memset(index_meta + sizeof(struct metadata), 0, index_meta ->size);
 
         fprintf(stderr, "return address found sufficient space \n");
-        return index_meta+sizeof(metadata);
+        return (int)index_meta+(int)sizeof(metadata);
       }
+      last_meta = index_meta;
       index_meta = index_meta->next;
     }
     fprintf(stderr, "I'm here line 114\n" );
@@ -155,13 +136,16 @@ void *mm_malloc(size_t size) {
     //use sbrk to creae more space on the heap
     sbrk(size+sizeof(metadata));
     struct metadata *md = curr_meta;
-    md->prev = index_meta;
+    fprintf(stderr,"current index_meta is %d", index_meta);
+    md->prev = last_meta;
     md->next = NULL;
     md->free = 0;
     md->size = size;
 
     memset((int)curr_meta + (int)sizeof(struct metadata), 0, size);
-    //fprintf(stderr, "already iterate through the heap, not space found, expend, return addr");
+    fprintf(stderr, "already iterate through the heap, not space found, expend, return addr\n");
+    fprintf(stderr,"here\n" );
+    fprintf(stderr, "md->prev= %d\n",(int*) md->prev );
 
     return (int)curr_meta + (int)sizeof(struct metadata);
 
@@ -182,9 +166,13 @@ void mm_free(void *ptr) {
     if (ptr == NULL){
       return ;
     }
-    struct metadata * need_to_free = (struct metadata *) (int)ptr-(int)sizeof(struct metadata);
+
+    struct metadata * need_to_free = (int)ptr-(int)sizeof(struct metadata);
+    fprintf(stderr, "need_to_free is %d\n", need_to_free);
+    fprintf(stderr, "size of metadata is %d\n", sizeof(struct metadata));
     fprintf(stderr, "set need_to_free->free to free\n");
     need_to_free->free = 1;
+    fprintf(stderr, "need_to_free->free is %d\n",need_to_free->free );
     // check whether need to colasce
     fprintf(stderr, "Before condition 1\n");
     if (need_to_free->prev != NULL && need_to_free->next !=NULL){
@@ -209,14 +197,21 @@ void mm_free(void *ptr) {
       }
     }
     fprintf(stderr, "Before condition 3\n");
+    fprintf(stderr, "need_to_free->prev is %d\n",need_to_free->prev );
     if (need_to_free->prev != NULL){
       fprintf(stderr, "In condition 3 \n");
+      fprintf(stderr, "need_to_free->free is %d\n",need_to_free->free);
+      fprintf(stderr, "need_to_free->next is %d\n",need_to_free->next);
+      fprintf(stderr, "need_to_free->prev->free  is %d\n",need_to_free->prev->free );
       if(need_to_free->prev->free == 1){
         need_to_free->prev->next = need_to_free->next;
-        need_to_free->next->prev = need_to_free->prev;
+        if (need_to_free->next!=NULL){
+          need_to_free->next->prev = need_to_free->prev;
+        }
         need_to_free->prev->size += need_to_free->size;
+        fprintf(stderr, "need_to_free->prev->size  is %d\n",need_to_free->prev->size );
         return;
       }
     }
-    fprintf(stderr, "After conditions\n");
+    return;
 }
