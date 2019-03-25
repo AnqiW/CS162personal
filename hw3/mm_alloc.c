@@ -127,6 +127,7 @@ void *mm_malloc(size_t size) {
     //if we are here we didn't find a sufficient space to put the a;locted memory
     //check hard_limit first
     curr_meta = sbrk(0);
+
     if(curr_meta== (void*)-1){
       return NULL;
     }
@@ -172,15 +173,22 @@ void *mm_realloc(void *ptr, size_t size) {
     }
     struct metadata * need_to_resize = (int)ptr-(int)sizeof(struct metadata);
     //if new size is smaller than the original size, resize the original one.
-    if ((int)size <= need_to_resize->size){
+    if ((int)size == need_to_resize->size){
+      return ptr;
+    }
+    if ((int)size < need_to_resize->size){
       //create a new block of smaller size s and only copy over the first s bytes
+
+      mm_free(ptr);
       struct metadata * new_place = mm_malloc(size);
       if(new_place ==NULL){
         return NULL;
       }
       memcpy(new_place, ptr, size);
-      mm_free(ptr);
+      return new_place ;
+
     }
+
     //if cannot allocate the new requested size, do not modity the original block
     if (mm_malloc(size)==NULL){
       return NULL;
