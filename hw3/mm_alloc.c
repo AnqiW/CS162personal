@@ -172,7 +172,7 @@ void *mm_realloc(void *ptr, size_t size) {
     }
     struct metadata * need_to_resize = (int)ptr-(int)sizeof(struct metadata);
     //if new size is smaller than the original size, resize the original one.
-    if ((int)size < need_to_resize->size){
+    if ((int)size <= need_to_resize->size){
       //create a new block of smaller size s and only copy over the first s bytes
       struct metadata * new_place = mm_malloc(size);
       if(new_place ==NULL){
