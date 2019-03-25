@@ -127,16 +127,20 @@ void *mm_malloc(size_t size) {
     //if we are here we didn't find a sufficient space to put the a;locted memory
     //check hard_limit first
     curr_meta = sbrk(0);
+    if(curr_meta== (void*)-1){
+      return NULL;
+    }
     struct rlimit rlim;
     getrlimit(RLIMIT_AS,&rlim);
     if ( rlim.rlim_cur <  (int)(curr_meta-head_metadata) + sizeof(struct metadata)+ size){
+      fprintf(stderr,"I 'm here in rlim.rlim_cur'\n" );
       //fprintf(stderr, "already iterate through the heap, not space found, cannot expend, return Null");
       return NULL;
     }
     //use sbrk to creae more space on the heap
     sbrk(size+sizeof(metadata));
     struct metadata *md = curr_meta;
-    fprintf(stderr,"current index_meta is %d", index_meta);
+
     md->prev = last_meta;
     md->next = NULL;
     md->free = 0;
@@ -171,6 +175,9 @@ void *mm_realloc(void *ptr, size_t size) {
     if ((int)size < need_to_resize->size){
       //create a new block of smaller size s and only copy over the first s bytes
       struct metadata * new_place = mm_malloc(size);
+      if(new_place ==NULL){
+        return NULL;
+      }
       memcpy(new_place, ptr, size);
       mm_free(ptr);
     }
@@ -180,6 +187,9 @@ void *mm_realloc(void *ptr, size_t size) {
     }
     //if larger, free and mm_alloc and then memcpy
     struct metadata * new_place = mm_malloc(size);
+    if(new_place ==NULL){
+      return NULL;
+    }
     memcpy(new_place, ptr, need_to_resize->size);
     mm_free(ptr);
     return new_place;
